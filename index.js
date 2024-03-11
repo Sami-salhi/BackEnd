@@ -58,7 +58,7 @@ app.post("/Createuser",async (req,res)=>{
     newUser.EtatCompte="Active"
     await newUser.save()
 
-    res.send("created")
+    res.send("created successfilly")
 })
 
 

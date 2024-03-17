@@ -6,6 +6,8 @@ const bcrypt = require("bcryptjs");
 const jwt= require("jsonwebtoken");
 const cookieParsar = require("cookie-parser");
 
+const cors = require("cors");
+
 
 mongoose.connect("mongodb+srv://sami:sami21032000@myapp.mfxyigl.mongodb.net/?retryWrites=true&w=majority&appName=MyApp")
 .then(()=>{
@@ -20,7 +22,9 @@ const { sendConfirmationEmail } = require("./routes/nodemailer");
 const Property = require("./models/Property");
 app.use(express.json());
 app.use(cookieParsar());
-
+app.use(cors({
+    origin :"http://localhost:3000",
+}))
 
 
 const jwt_Secret_Key = "8hEnPGeoBqGUT6zksxt4G95gW+uMdzwe7EVaRnp0xRI="

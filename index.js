@@ -358,5 +358,5 @@ app.post("/aaqari/api/auth/inscription",async (req,res)=>{
 
 
 app.listen(2000,()=>{
-    console.log("Iam listining in port 2000");
+    console.log("Iam listining in porte 2000");
 });

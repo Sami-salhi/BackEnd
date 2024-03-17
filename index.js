@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
 
+const bodyParser = require('body-parser');
+
 const bcrypt = require("bcryptjs");
 const jwt= require("jsonwebtoken");
 const cookieParsar = require("cookie-parser");
@@ -21,6 +23,7 @@ const Utilisateurs =require("./models/Utilisateur");
 const { sendConfirmationEmail } = require("./routes/nodemailer");
 const Property = require("./models/Property");
 app.use(express.json());
+app.use(bodyParser.json());
 app.use(cookieParsar());
 app.use(cors({
     origin :"http://localhost:3000",
@@ -307,6 +310,7 @@ app.post("/aaqari/api/auth/connexion",cors() ,async (req,res)=>{
 
 })
 
+
 app.post("/aaqari/api/auth/inscription",cors() ,async (req,res)=>{
     try{
     const data = req.body;
@@ -373,6 +377,24 @@ app.get("/allUsers",cors(), async (req,res)=>{
     res.send(user)
 })
 
+app.post("/aaqari/api/connexionTest",cors() , async (req,res)=>{
+    
+    const data = req.body;
+
+    /*res.send("hi " + data.gmail+" "+data.password)*/
+    try{
+    const user = await Utilisateurs.findOne( {userName : data.gmail});
+    if(!user) return res.status(404).json("utilisateur n'exist pas")
+
+    const isPasswordCorrect = await bcrypt.compare(data.password ,user.auth.password);
+    if(!isPasswordCorrect) return res.send("Mot de passe ou nom d’utilisateur erroné")  /*.status(400) */
+
+    res.send(user)
+    }catch(err){
+        res.send("recuperation des information d'utilisateur est echoué") /*.status(500) */
+    }
+    
+})
 
 
 app.listen(2000,()=>{

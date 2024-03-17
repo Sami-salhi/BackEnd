@@ -25,6 +25,7 @@ app.use(cookieParsar());
 app.use(cors({
     origin :"http://localhost:3000",
     methods:["GET", "POST", "PUT", "DELETE"],
+    optionsSuccessStatus: 200,
 }))
 
 
@@ -279,7 +280,7 @@ app.put("/SignalerProperty",async (req,res)=>{
 
 /*Authentification connexion / inscription */
 
-app.post("/aaqari/api/auth/connexion",async (req,res)=>{
+app.post("/aaqari/api/auth/connexion",cors() ,async (req,res)=>{
     try{
 
         const data = req.body;
@@ -305,7 +306,7 @@ app.post("/aaqari/api/auth/connexion",async (req,res)=>{
 
 })
 
-app.post("/aaqari/api/auth/inscription",async (req,res)=>{
+app.post("/aaqari/api/auth/inscription",cors() ,async (req,res)=>{
     try{
     const data = req.body;
     const user = await Utilisateurs.findOne( {userName : data.gmail});

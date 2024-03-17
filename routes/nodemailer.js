@@ -2,32 +2,29 @@ const nodemailer = require("nodemailer");
 
 
 const transport = nodemailer.createTransport({
-    service : "Gmail",
+    host : "smtp.gmail.com",
+    port : 465,
+    secure: true,
     auth: {
-        user : "samisalhitnt@gmail.com",
-        pass : "sami21032000salhi",
+        user : 'lyrx.rnb@gmail.com',
+        pass : "yabikausmnjcuxqi",
     },
 });
 
-module.exports.sendConfirmationEmail = (email, activationCode)=>{
-    transport.sendMail({
-        from : "samisalhitnt@gmail.com",
+module.exports.sendConfirmationEmail = async (email, activationCode)=>{
+    await transport.sendMail({
+        from : "lyrx.rnb@gmail.com",
         to: email,
         subject: "Confirmer votre compte",
-        html: /*CardHtml(activationCode)*/activationCode,
+        text:"Confirmation",
+        html: CardHtml(activationCode),
     })
     .catch((err)=> console.log("Oops envoyer mail is failled"));
 
 };
 
-/*function CardHtml(code) {
-    return(
-        <div>
-        <h1>Email de confirmation</h1>
-        <h2>Bonjour</h2>
-        <p> Pour activer votre compte , veuillez retaper ce code la </p>
-        <h1>{code}</h1>
-        </div>
+function CardHtml(code) {
+    return("<div><h2>Bonjour</h2><h1>Email de confirmation</h1><p> Pour activer votre compte , veuillez retaper ce code la </p>  <h1>"+code+"</h1></div>"   
     )
     
-}*/
+}

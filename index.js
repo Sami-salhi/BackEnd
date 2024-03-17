@@ -2,8 +2,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
 
-
-
+const bcrypt = require("bcryptjs");
+const jwt= require("jsonwebtoken");
+const cookieParsar = require("cookie-parser");
 
 
 mongoose.connect("mongodb+srv://sami:sami21032000@myapp.mfxyigl.mongodb.net/?retryWrites=true&w=majority&appName=MyApp")
@@ -18,7 +19,11 @@ const Utilisateurs =require("./models/Utilisateur");
 const { sendConfirmationEmail } = require("./routes/nodemailer");
 const Property = require("./models/Property");
 app.use(express.json());
+app.use(cookieParsar());
 
+
+
+const jwt_Secret_Key = "8hEnPGeoBqGUT6zksxt4G95gW+uMdzwe7EVaRnp0xRI="
 function generateCodeConfirmation() {
     const numberCode = "012345678";
     let activationCode ="";
@@ -34,10 +39,11 @@ app.get("/code",  (req,res)=>{
     res.send(code);
 })
 
-app.post("/envoyerMail",  (req,res)=>{
+/* envoyer un mail de confirmation compte*/ 
+app.post("/envoyerMail", async (req,res)=>{
     let code =  generateCodeConfirmation();
     const mailto = "samisalhi.rnb@gmail.com";
-    sendConfirmationEmail(mailto,code);
+    await sendConfirmationEmail(mailto,code);
     res.send(code);
 })
 
@@ -266,10 +272,86 @@ app.put("/SignalerProperty",async (req,res)=>{
 
 
 
+/*Authentification connexion / inscription */
+
+app.post("/aaqari/api/auth/connexion",async (req,res)=>{
+    try{
+
+        const data = req.body;
+        const user = await Utilisateurs.findOne( {userName : data.gmail});
+        if(!user) return res.status(404).json("utilisateur n'exist pas")
+
+       const isPasswordCorrect = await bcrypt.compare(data.password ,user.auth.password);
+        if(!isPasswordCorrect) return res.status(400).send("Mot de passe ou nom d’utilisateur erroné")
 
 
 
+        const{isAdmin, ...otherDetails } = user._doc;
 
+        const isAdminValue = user.isAdmin;
+
+        const token = jwt.sign({id : user._id, isAdminValue},jwt_Secret_Key);
+
+        res.cookie("access_token",token,{httpOnly:true,}).status(200).json({...otherDetails});
+
+    }catch(err){
+        res.status(500).send("recuperation des information d'utilisateur est echoué")
+    }
+
+})
+
+app.post("/aaqari/api/auth/inscription",async (req,res)=>{
+    try{
+    const data = req.body;
+    const user = await Utilisateurs.findOne( {userName : data.gmail});
+    if(user) {return res.status(402).json("votre gmail déjà utilisé")}
+    else{
+
+    const newUser = new Utilisateurs()
+    
+    newUser.nom=data.nom
+    newUser.prenom=data.prenom
+    newUser.DateNaissance=data.naissance
+    newUser.ComeQui=data.commeQui
+    newUser.userName=data.gmail
+    if(data.commeQui ==="proprietaire"){
+        newUser.Cin=data.cin
+    }else{
+        newUser.Cin=""
+    }
+    newUser.NumTel=data.numeroTel
+
+
+    const salt = bcrypt.genSaltSync(10);
+    const PassHash = bcrypt.hashSync(data.motDpasse,salt);
+
+    newUser.auth.email=data.gmail
+    newUser.auth.password=PassHash
+    newUser.auth.dateModification =data.dateMof
+
+    newUser.ImgProfil=data.Img
+    newUser.EtatCompte="Active"
+
+    newUser.isActive.status=false
+    newUser.isActive.codeActivation =""
+    newUser.isActive.codeActivation=""
+
+    
+
+    await newUser.save()
+
+    const isAdminValue = newUser.isAdmin;
+
+    const token = jwt.sign({id : newUser._id, isAdminValue},jwt_Secret_Key);
+    res.cookie("access_token",token,{httpOnly:true,}).status(200).send("utilisateur est creé avec succeés"+newUser).json()
+
+    }
+    }catch(err){
+        res.status(500).send("creation un nouveau utilisateur est echoué")
+    }
+
+   
+})
 
 
 

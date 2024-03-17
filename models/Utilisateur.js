@@ -8,13 +8,29 @@ const UserSchema = new Schema({
     ComeQui :String,
     Cin: String,
     NumTel: String,
+    userName: String,
     auth: {
         email : String,
         password: String,
         dateModification: String
     },
     ImgProfil: String,
-    EtatCompte: String
+    EtatCompte: String,
+    isActive:{
+        status: Boolean,
+        codeActivation: String,
+        codeConfirmation: String,
+    },
+    myFavorite:{
+        idProperty: String,
+        nomProperty: String,
+        typePropeerty: String,
+        dateFavorise: String,
+    },
+    isAdmin : {
+        type : Boolean,
+        default : false,
+    }
 })
 
 

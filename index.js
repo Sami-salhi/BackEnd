@@ -25,6 +25,7 @@ app.use(cookieParsar());
 app.use(cors({
     origin :"http://localhost:3000",
     methods:["GET", "POST", "PUT", "DELETE"],
+    preflightContinue: false,
     optionsSuccessStatus: 200,
 }))
 
@@ -359,7 +360,18 @@ app.post("/aaqari/api/auth/inscription",cors() ,async (req,res)=>{
    
 })
 
+app.get("/BackEnd",cors() , (req,res)=>{
 
+    res.send("hi i am back end")
+})
+
+app.get("/allUsers",cors(), async (req,res)=>{
+    
+    const user = await Utilisateurs.find();
+
+
+    res.send(user)
+})
 
 
 

@@ -49,13 +49,7 @@ app.get("/code",  (req,res)=>{
     res.send(code);
 })
 
-/* envoyer un mail de confirmation compte*/ 
-app.post("/envoyerMail", async (req,res)=>{
-    let code =  generateCodeConfirmation();
-    const mailto = "samisalhi.rnb@gmail.com";
-    await sendConfirmationEmail(mailto,code);
-    res.send(code);
-})
+
 
 
 
@@ -369,6 +363,9 @@ app.get("/BackEnd",cors() , (req,res)=>{
     res.send("hi i am back end")
 })
 
+
+
+
 app.get("/allUsers",cors(), async (req,res)=>{
     
     const user = await Utilisateurs.find();
@@ -376,6 +373,11 @@ app.get("/allUsers",cors(), async (req,res)=>{
 
     res.send(user)
 })
+
+
+
+
+
 
 app.post("/aaqari/api/connexionTest",cors() , async (req,res)=>{
     
@@ -389,12 +391,215 @@ app.post("/aaqari/api/connexionTest",cors() , async (req,res)=>{
     const isPasswordCorrect = await bcrypt.compare(data.password ,user.auth.password);
     if(!isPasswordCorrect) return res.send("Mot de passe ou nom d’utilisateur erroné")  /*.status(400) */
 
-    res.send(user)
+    
+    const{isAdmin, ...otherDetails } = user._doc;
+
+    const isAdminValue = user.isAdmin;
+
+    const token = jwt.sign({id : user._id, isAdminValue},jwt_Secret_Key);
+
+    res.cookie("access_token",token,{httpOnly:true,}).status(200).json({...otherDetails,token});
     }catch(err){
         res.send("recuperation des information d'utilisateur est echoué") /*.status(500) */
     }
     
 })
+
+
+app.post("/aaqari/api/inscription",cors() ,async (req,res)=>{
+    
+
+    try{
+        const data = req.body;
+        const user = await Utilisateurs.findOne( {userName : data.gmail});
+        if(user) {return res.json("votre gmail déjà utilisé")} 
+        else{
+
+            const newUser = new Utilisateurs()
+            
+            newUser.nom=data.nom
+            newUser.prenom=data.prenom
+            newUser.DateNaissance=data.naissance
+            newUser.ComeQui=data.commeQui
+            newUser.userName=data.gmail
+            if(data.commeQui ==="proprietaire"){
+                newUser.Cin=data.cin
+            }else{
+                newUser.Cin=""
+            }
+            newUser.NumTel=data.numeroTel
+        
+        
+            const salt = bcrypt.genSaltSync(10);
+            const PassHash = bcrypt.hashSync(data.motDpasse,salt);
+        
+            newUser.auth.email=data.gmail
+            newUser.auth.password=PassHash
+            newUser.auth.dateModification =data.dateMof
+        
+            newUser.ImgProfil=data.Img
+            newUser.EtatCompte="Active"
+        
+            newUser.isActive.status=false
+            newUser.isActive.codeActivation =""
+            newUser.isActive.codeActivation=""
+        
+            
+        
+            await newUser.save()
+        
+            const isAdminValue = newUser.isAdmin;
+        
+            const token = jwt.sign({id : newUser._id, isAdminValue},jwt_Secret_Key);
+            res.cookie("access_token",token,{httpOnly:true,}).status(200).send("utilisateur est creé avec succeés"+newUser).json()
+        
+            }
+
+    }catch(err){
+        res.send("inscription est echoué");
+
+    }
+    
+})
+
+
+
+/* envoyer un mail de confirmation compte*/ 
+app.post("/envoyerMail", async (req,res)=>{
+    /*let code =  generateCodeConfirmation();
+    const mailto = "samisalhi.rnb@gmail.com";
+    await sendConfirmationEmail(mailto,code);*/
+    res.send("hi im step de confirmation par google");
+})
+
+
+
+app.post("/confirmationAccountByGoogle",cors(), async (req,res)=>{
+    const data = req.body;
+    let code =  generateCodeConfirmation();
+    const mailto = data.gmail;
+    await sendConfirmationEmail(mailto,code);
+
+    const currentTime = new Date();
+
+    const dataMail ={
+        dateCurrent : currentTime,
+        gmailConcernant : data.gmail,
+        codeConfirmation : code,
+        step : "verification",
+    }
+    res.send(dataMail);
+
+    
+})
+
+
+function statusRequest(stat , desc) {
+    
+
+    return data = {
+        status : stat,
+        description : desc,
+
+    }
+    
+ }
+
+ 
+/* #################################### start mise a jour utilisateur #################################### */
+/* update data utilisateur */
+app.put("/aaqari/api/utilisateur/update/infoPersonnel",cors(), async (req,res)=>{
+    const data = req.body;
+    const etat = statusRequest("200" , "success");
+
+    try {
+    const user = await Utilisateurs.findByIdAndUpdate(data.idClient);
+    if(!user) {
+        const etat = statusRequest("404" , "utilisateur n'existe pas");
+        return res.send({etat}).json();
+    }
+     
+
+    const isPasswordCorrect = await bcrypt.compare(data.passConfirm ,user.auth.password);
+    if(!isPasswordCorrect){ 
+        const etat = statusRequest("402" , "mot de passe incorrect");
+        return res.send({etat}).json();
+    }
+
+    user.nom = data.nom;
+    user.prenom = data.prenom;
+    user.DateNaissance = data.dateNaissance;
+    user.NumTel = data.tel;
+
+
+    await user.updateOne(user) ;
+    res.send({ etat , user}).json();
+
+    }
+    catch(err){
+        res.status(500).send(' update utilisateur est echoué');
+    } 
+ })
+
+/* update password utilisateur */
+app.put("/aaqari/api/utilisateur/update/security",cors(), async (req,res)=>{ 
+    const data = req.body;
+    const etat = statusRequest("200" , "success");
+    const currentTime = new Date();
+
+    try {
+        const user = await Utilisateurs.findByIdAndUpdate(data.idClient);
+        if(!user) {
+            const etat = statusRequest("404" , "utilisateur n'existe pas");
+            return res.send({etat}).json();
+        }
+
+        const isPasswordCorrect = await bcrypt.compare(data.passConfirm ,user.auth.password);
+        if(!isPasswordCorrect){ 
+            const etat = statusRequest("402" , "mot de passe incorrect");
+            return res.send({etat}).json();
+        }
+
+        const salt = bcrypt.genSaltSync(10);
+        const PassHash = bcrypt.hashSync(data.NewPassword,salt);
+
+        user.auth.password = PassHash;
+        user.auth.dateModification = currentTime ;
+        await user.updateOne(user) ;
+        res.send({ etat , user}).json();
+    
+        }
+        catch(err){
+            res.status(500).send(' mise a jour de mot de passe utilisateur est échoué');
+        }
+
+})
+/* update photo utilisateur */
+app.put("/aaqari/api/utilisateur/update/photo",cors(), async (req,res)=>{ 
+    const data = req.body;
+    const etat = statusRequest("200" , "success");
+   
+
+    try {
+        const user = await Utilisateurs.findByIdAndUpdate(data.idClient);
+        if(!user) {
+            const etat = statusRequest("404" , "utilisateur n'existe pas");
+            return res.send({etat}).json();
+        }
+
+        user.ImgProfil = data.NewImgProfil ;
+        await user.updateOne(user) ;
+        res.send({ etat , user}).json();
+    
+        }
+        catch(err){
+            res.status(500).send(' mise a jour de photo utilisateur est échoué');
+        }
+
+})
+/* #################################### end mise a jour utilisateur #################################### */
+
+
 
 
 app.listen(2000,()=>{

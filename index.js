@@ -377,7 +377,7 @@ app.get("/allUsers",cors(), async (req,res)=>{
 
 
 
-
+/* #################################### start connexion au compte utilisateur #################################### */
 
 app.post("/aaqari/api/connexionTest",cors() , async (req,res)=>{
     
@@ -404,8 +404,10 @@ app.post("/aaqari/api/connexionTest",cors() , async (req,res)=>{
     }
     
 })
+/* #################################### end connexion au compte utilisateur #################################### */
 
 
+/* #################################### start creation  compte utilisateur #################################### */
 app.post("/aaqari/api/inscription",cors() ,async (req,res)=>{
     
 
@@ -461,7 +463,7 @@ app.post("/aaqari/api/inscription",cors() ,async (req,res)=>{
     }
     
 })
-
+/* #################################### end creation  compte utilisateur #################################### */
 
 
 /* envoyer un mail de confirmation compte*/ 
@@ -473,7 +475,7 @@ app.post("/envoyerMail", async (req,res)=>{
 })
 
 
-
+/* #################################### start confirmation compte utilisateur by gmail #################################### */
 app.post("/confirmationAccountByGoogle",cors(), async (req,res)=>{
     const data = req.body;
     let code =  generateCodeConfirmation();
@@ -492,20 +494,19 @@ app.post("/confirmationAccountByGoogle",cors(), async (req,res)=>{
 
     
 })
+/* #################################### end confirmation compte utilisateur by gmail #################################### */
 
 
+/* #################################### start function de gestion des erreur #################################### */
 function statusRequest(stat , desc) {
-    
-
     return data = {
         status : stat,
         description : desc,
-
     }
-    
  }
+/* #################################### end function de gestion des erreur #################################### */
 
- 
+
 /* #################################### start mise a jour utilisateur #################################### */
 /* update data utilisateur */
 app.put("/aaqari/api/utilisateur/update/infoPersonnel",cors(), async (req,res)=>{

@@ -603,6 +603,139 @@ app.put("/aaqari/api/utilisateur/update/photo",cors(), async (req,res)=>{
 
 
 
+/* #################################### start signaler property #################################### */
+app.put("/aaqari/api/utilisateur/signaler/property",cors(), async (req,res)=>{ 
+    const data = req.body;
+    const etat = statusRequest("200" , "success");
+    const idprop = data.idProperty;
+    const currentTime = new Date();
+   
+
+    try {
+        const property = await Property.findByIdAndUpdate(idprop);
+
+        if(!property) {
+            const etat = statusRequest("404" , "property n'existe pas");
+            return res.send({etat}).json();
+        }
+        property.signaler.push({
+            idClient : data.idClient,
+            nomComplet : data.nomComplet,
+            raison : data.raison,
+            justification : data.justification,
+            dateSignal : currentTime
+        }) 
+
+        await property.updateOne(property);
+        res.send({property,etat});
+        }
+        catch(err){
+            res.status(500).send("signaler d'un property est echoué");
+        }
+       
+
+})
+
+/* #################################### end signaler property #################################### */
+
+
+/* #################################### start Fonction calcul rating property ####################################  */
+function CalculRating(tab) {
+    var SommeStar = 0;
+    var rate = 0.00;
+    var TailTab = 0;
+    for (let i = 0; i < tab.length; i++) {
+        SommeStar +=  parseInt(tab[i].notation, 10); 
+        TailTab += 1;
+    }
+    rate = SommeStar/TailTab;
+    return parseFloat(rate.toFixed(2));
+}
+/* #################################### end Fonction calcul rating property ####################################  */
+
+
+/* #################################### start Fonction existence person rating property ####################################  */
+function ExistencePersonRating(tab ,idUserRating) {
+    let exist;
+    if(tab.length > 0){
+        for (let i = 0; i < tab.length; i++) {
+            if(tab[i].idClient == idUserRating){
+                exist = true;
+                break;
+            }else{
+                exist = false;
+            }
+    }}else{
+        exist = false;
+    }
+    return exist;
+}
+/* #################################### end Fonction existence person rating property ####################################  */
+
+/* #################################### start Fonction recherche indice person rating dans table rate property ####################################  */
+function IndicePersonRating(tab ,idUserRating) {
+    var indice = 0;
+    if(tab.length > 0){
+        for (let i = 0; i < tab.length; i++) {
+            if(tab[i].idClient == idUserRating){
+                indice = i;
+                break;
+            }else{
+                indice = 0;
+            }
+    }}
+    return indice;
+}
+/* #################################### end Fonction recherche indice person rating dans table rate property ####################################  */
+
+/* #################################### start Evaluer property #################################### */
+app.put("/aaqari/api/utilisateur/evaluer/property",cors(), async (req,res)=>{ 
+    const data = req.body;
+    const etat = statusRequest("200" , "success");
+    const idprop = data.idProperty;
+    const currentTime = new Date();
+   
+
+    try {
+        const property = await Property.findByIdAndUpdate(idprop);
+        if(!property) {
+            const etat = statusRequest("404" , "property n'existe pas");
+            return res.send({etat}).json();
+        }
+         
+
+         const personIsRating = ExistencePersonRating(property.evaluer.listeEvaluateurs ,data.idClient);
+         if(personIsRating == true){
+            var indice = IndicePersonRating(property.evaluer.listeEvaluateurs ,data.idClient);
+            property.evaluer.listeEvaluateurs[indice].notation = data.rate;
+            property.evaluer.listeEvaluateurs[indice].dateRating = currentTime;
+         }
+        if(personIsRating == false){
+        property.evaluer.listeEvaluateurs.push({
+                idClient : data.idClient,
+                nomComplet : data.nomComplet,
+                notation : data.rate,
+                dateRating : currentTime
+        })} 
+        await property.updateOne(property);
+        const rate =  CalculRating(property.evaluer.listeEvaluateurs);
+        const rateToString = rate.toString();
+        property.evaluer.value = rateToString;
+
+        await property.updateOne(property);
+        res.send({property,etat,rate , "PersonRatingExist":personIsRating });
+        }
+        catch(err){
+            res.status(500).send("evaluer d'un property est echoué");
+        }
+       
+
+})
+/* #################################### end Evaluer property #################################### */
+
+
+
+
 app.listen(2000,()=>{
     console.log("Iam listining in porte 2000");
 });

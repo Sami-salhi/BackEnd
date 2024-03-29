@@ -280,6 +280,7 @@ app.put("/SignalerProperty",async (req,res)=>{
 /*Authentification connexion / inscription */
 
 app.post("/aaqari/api/auth/connexion",cors() ,async (req,res)=>{
+    
     try{
 
         const data = req.body;
@@ -381,16 +382,23 @@ app.get("/allUsers",cors(), async (req,res)=>{
 /* #################################### start connexion au compte utilisateur #################################### */
 
 app.post("/aaqari/api/connexionTest",cors() , async (req,res)=>{
+    const etat = statusRequest("200" , "success");
     
     const data = req.body;
 
     /*res.send("hi " + data.gmail+" "+data.password)*/
     try{
     const user = await Utilisateurs.findOne( {userName : data.gmail});
-    if(!user) return res.status(404).json("utilisateur n'exist pas")
+    if(!user) {
+        const etat = statusRequest("404" , "utilisateur n'exist pas");
+        return res.send({etat}).json();
+    }
 
     const isPasswordCorrect = await bcrypt.compare(data.password ,user.auth.password);
-    if(!isPasswordCorrect) return res.send("Mot de passe ou nom d’utilisateur erroné")  /*.status(400) */
+    if(!isPasswordCorrect){
+        const etat = statusRequest("400" , "Mot de passe ou nom d’utilisateur erroné");
+        return res.send({etat}).json();
+    } 
 
     
     const{isAdmin, ...otherDetails } = user._doc;
@@ -399,7 +407,7 @@ app.post("/aaqari/api/connexionTest",cors() , async (req,res)=>{
 
     const token = jwt.sign({id : user._id, isAdminValue},jwt_Secret_Key);
 
-    res.cookie("access_token",token,{httpOnly:true,}).status(200).json({...otherDetails,token});
+    res.cookie("access_token",token,{httpOnly:true,}).status(200).json({...otherDetails,token,etat});
     }catch(err){
         res.send("recuperation des information d'utilisateur est echoué") /*.status(500) */
     }
@@ -751,18 +759,22 @@ app.post("/aaqari/api/utilisateur/property/demande",cors() ,async (req,res)=>{
             return res.send({etat}).json();
         }
         
-        const demande = await Demandes.findOne({CinClient : data.CinClient});
-        if(demande && demande.idProperty === data.idProperty){
+        const demande = await Demandes.findOne({CinClient : data.CinClient ,idProperty : data.idProperty});
+        if(demande) {
             const etat = statusRequest("202" , "demande déja existe");
             return res.send({etat}).json();
         }
-        if(demande.idProperty !== data.idProperty){
+        /*if(demande && demande.idProperty === data.idProperty){
+            const etat = statusRequest("202" , "demande déja existe");
+            return res.send({etat}).json();
+        }*/
+       /* if(demande.idProperty !== data.idProperty){
             return res.send({demande , staus:" demande n'existe pas"});
-        }
+        }*/
         
-        res.send("wait")
         
-        /*if(!demande || demande.idProperty != data.idProperty){
+        
+   
         const newDemande = new Demandes();
         newDemande.idProperty =  data.idProperty
         newDemande.type =  data.type
@@ -826,11 +838,6 @@ app.post("/aaqari/api/utilisateur/property/demande",cors() ,async (req,res)=>{
         await property.updateOne(property);
         res.send({newDemande ,etat});
 
-    }*/
-
-     
-    
-       
 
     }catch(err){
 

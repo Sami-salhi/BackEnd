@@ -22,6 +22,7 @@ mongoose.connect("mongodb+srv://sami:sami21032000@myapp.mfxyigl.mongodb.net/?ret
 const Utilisateurs =require("./models/Utilisateur");
 const { sendConfirmationEmail } = require("./routes/nodemailer");
 const Property = require("./models/Property");
+const Demandes = require("./models/Demandes");
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParsar());
@@ -734,6 +735,114 @@ app.put("/aaqari/api/utilisateur/evaluer/property",cors(), async (req,res)=>{
 /* #################################### end Evaluer property #################################### */
 
 
+/* #################################### start new demande location / achat #################################### */
+
+app.post("/aaqari/api/utilisateur/property/demande",cors() ,async (req,res)=>{
+    const data = req.body;
+    const etat = statusRequest("200" , "success");
+    const idprop = data.idProperty;
+    const opt = data.operation;
+    const currentTime = new Date();
+
+    try {
+        const propertyConcerne = await Property.findById(idprop);
+        if(!propertyConcerne) {
+            const etat = statusRequest("404" , "immobilie n'existe pas");
+            return res.send({etat}).json();
+        }
+        
+        const demande = await Demandes.findOne({CinClient : data.CinClient});
+        if(demande && demande.idProperty === data.idProperty){
+            const etat = statusRequest("202" , "demande déja existe");
+            return res.send({etat}).json();
+        }
+        if(demande.idProperty !== data.idProperty){
+            return res.send({demande , staus:" demande n'existe pas"});
+        }
+        
+        res.send("wait")
+        
+        /*if(!demande || demande.idProperty != data.idProperty){
+        const newDemande = new Demandes();
+        newDemande.idProperty =  data.idProperty
+        newDemande.type =  data.type
+        newDemande.idClient =  data.idClient
+        newDemande.CinClient =  data.CinClient
+        newDemande.operation =  data.operation
+
+        newDemande.InfoClient.nom =  data.nom
+        newDemande.InfoClient.nomArab =  data.nomArab
+        newDemande.InfoClient.prenom=  data.prenom
+        newDemande.InfoClient.prenomArab =  data.prenomArab
+
+        newDemande.Coordonnées.NumeroTel =  data.tel
+        newDemande.Coordonnées.gmail =  data.email
+
+        if(opt ==="location"){
+            newDemande.IsLocation.valueLoc = true
+            newDemande.IsLocation.periodeRequise = data.periodeRequise
+            newDemande.IsLocation.DateDebut = data.dateDebut
+            newDemande.IsLocation.DateFin = data.dateFin
+        }else{
+            newDemande.IsLocation.valueLoc = false
+            newDemande.IsLocation.periodeRequise = ""
+            newDemande.IsLocation.DateDebut = ""
+            newDemande.IsLocation.DateFin = ""
+        }
+
+        if(opt ==="achat"){
+            newDemande.IsAchat.valueAchat = true
+            newDemande.IsAchat.montantPropose = data.montantPropose
+        }else{
+            newDemande.IsAchat.valueAchat = false
+            newDemande.IsAchat.montantPropose = ""
+        }
+
+        newDemande.idConcernéProprietaire = data.IdProprietaire
+        newDemande.CinProprietaire = data.CinProprietaire
+        newDemande.infoProprietaire.nom = data.nomProp
+        newDemande.infoProprietaire.prenom = data.prenomProp
+        newDemande.infoProprietaire.NumeroTel = data.numeroTelProp
+        newDemande.infoProprietaire.gmail = data.gmailProp
+
+        newDemande.dateDemande = currentTime
+
+        newDemande.decision.valueDec = "en attente"
+        newDemande.decision.dateDec = ""
+        
+        await newDemande.save()
+
+        const nomClientComplet = data.nom+" "+data.prenom;
+        const property = await Property.findByIdAndUpdate(idprop);
+        property.offreDemande.push({
+            idDmd : newDemande._id,
+            idClient : data.idClient,
+            nomComplet : nomClientComplet,
+            prixPropose : data.montantPropose,
+            dateOffre : currentTime,
+            statut : "en attente"
+        })
+
+        await property.updateOne(property);
+        res.send({newDemande ,etat});
+
+    }*/
+
+     
+    
+       
+
+    }catch(err){
+
+        res.status(500).send('creation de nouvelle demande est échoué');
+    }
+
+
+    
+})
+
+
+/* #################################### end new demande location / achat #################################### */
 
 
 app.listen(2000,()=>{

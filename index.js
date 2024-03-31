@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const {format} = require('date-fns');
 const app = express();
 
 const bodyParser = require('body-parser');
@@ -44,6 +45,14 @@ function generateCodeConfirmation() {
  return activationCode;
 }
 
+function generateCodeActivation() {
+    const numberCode = "012345678abcdefghijklmnopqrstuvwxyz";
+    let activationCode ="";
+    for(let i = 0;i<20;i++){
+    activationCode += numberCode[Math.floor(Math.random()*numberCode.length)];
+    }
+ return activationCode;
+}
 
 app.get("/code",  (req,res)=>{
     let code =  generateCodeConfirmation();
@@ -407,7 +416,7 @@ app.post("/aaqari/api/connexionTest",cors() , async (req,res)=>{
 
     const token = jwt.sign({id : user._id, isAdminValue},jwt_Secret_Key);
 
-    res.cookie("access_token",token,{httpOnly:true,}).status(200).json({...otherDetails,token,etat});
+    res.cookie("access_token",token,{httpOnly:true,}).status(200).json({/*...otherDetails*/user,token,etat});
     }catch(err){
         res.send("recuperation des information d'utilisateur est echoué") /*.status(500) */
     }
@@ -418,12 +427,17 @@ app.post("/aaqari/api/connexionTest",cors() , async (req,res)=>{
 
 /* #################################### start creation  compte utilisateur #################################### */
 app.post("/aaqari/api/inscription",cors() ,async (req,res)=>{
-    
+    const currentDate = new Date();
+    const formattedDate = format(currentDate, 'dd/MM/yyyy HH:mm');
+    const etat = statusRequest("200" , "success");
 
     try{
         const data = req.body;
         const user = await Utilisateurs.findOne( {userName : data.gmail});
-        if(user) {return res.json("votre gmail déjà utilisé")} 
+        if(user) {
+            const etat = statusRequest("400" , "votre gmail déjà utilisé");
+            return res.send({etat}).json();
+        } 
         else{
 
             const newUser = new Utilisateurs()
@@ -431,13 +445,12 @@ app.post("/aaqari/api/inscription",cors() ,async (req,res)=>{
             newUser.nom=data.nom
             newUser.prenom=data.prenom
             newUser.DateNaissance=data.naissance
-            newUser.ComeQui=data.commeQui
+            
             newUser.userName=data.gmail
-            if(data.commeQui ==="proprietaire"){
-                newUser.Cin=data.cin
-            }else{
-                newUser.Cin=""
-            }
+            newUser.ComeQui=data.commeQui
+            newUser.Cin=data.cin
+           
+          
             newUser.NumTel=data.numeroTel
         
         
@@ -446,23 +459,20 @@ app.post("/aaqari/api/inscription",cors() ,async (req,res)=>{
         
             newUser.auth.email=data.gmail
             newUser.auth.password=PassHash
-            newUser.auth.dateModification =data.dateMof
+            newUser.auth.dateModification =formattedDate
         
             newUser.ImgProfil=data.Img
             newUser.EtatCompte="Active"
         
-            newUser.isActive.status=false
-            newUser.isActive.codeActivation =""
-            newUser.isActive.codeActivation=""
-        
-            
+            newUser.isActive.status=true
+            newUser.isActive.codeActivation =generateCodeActivation()
+            newUser.isActive.codeConfirmation=""
         
             await newUser.save()
         
             const isAdminValue = newUser.isAdmin;
-        
             const token = jwt.sign({id : newUser._id, isAdminValue},jwt_Secret_Key);
-            res.cookie("access_token",token,{httpOnly:true,}).status(200).send("utilisateur est creé avec succeés"+newUser).json()
+            res.cookie('access_token',token,{ httpOnly: true }).send({newUser , token, etat}).json()
         
             }
 
@@ -482,7 +492,41 @@ app.post("/envoyerMail", async (req,res)=>{
     await sendConfirmationEmail(mailto,code);*/
     res.send("hi im step de confirmation par google");
 })
+/* #################################### start verifier le existance email tel , cin avant sign up de new user #################################### */
+app.post("/aaqari/api/verifyContact/NewUser",cors(), async (req,res)=>{
+    const data = req.body;
+    const etat = statusRequest("200" , "success");
+   
 
+    try {
+        const user = await Utilisateurs.findOne({userName : data.email , NumTel : data.tel});
+        if(user) {
+            const etat = statusRequest("400" , "Email et Numero de téléphone sont utilisé");
+            return res.send({etat}).json();
+        }
+
+        const user1 = await Utilisateurs.findOne({userName : data.email});
+        if(user1) {
+            const etat = statusRequest("402" , "Email déjà utilisé");
+            return res.send({etat}).json();
+        }
+
+        const user2 = await Utilisateurs.findOne({NumTel : data.tel});
+        if(user2) {
+            const etat = statusRequest("401" , "Numero de téléphone déjà utilisé");
+            return res.send({etat}).json();
+        }
+
+       
+        res.send({etat , "res":"votre contact non utilisé"});
+        }
+        catch(err){
+            res.status(500).send('verification de contact de nouvelle utilisateur est échoué');
+        }
+
+})
+
+/* #################################### end verifier le existance email tel , cin avant sign up de new user #################################### */
 
 /* #################################### start confirmation compte utilisateur by gmail #################################### */
 app.post("/confirmationAccountByGoogle",cors(), async (req,res)=>{

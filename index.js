@@ -28,7 +28,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParsar());
 app.use(cors({
-    origin :"http://localhost:3000",
+    origin :"http://localhost:3000" || "http://192.168.1.129:3000",
     methods:["GET", "POST", "PUT", "DELETE"],
     preflightContinue: false,
     optionsSuccessStatus: 200,
@@ -894,6 +894,27 @@ app.post("/aaqari/api/utilisateur/property/demande",cors() ,async (req,res)=>{
 
 
 /* #################################### end new demande location / achat #################################### */
+
+/* #################################### start request get all user for admin #################################### */
+app.get("/aaqari/api/admin/allUser" ,cors(),async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    try {
+    const users = await Utilisateurs.find();
+   /* if(!users) {
+        const etat = statusRequest("404" , "aucun utilisateur existe");
+        return res.send({etat}).json();
+    }*/
+
+    res.send({etat , users});
+    }
+    catch(err){
+        res.status(500).send('oops recuperation de users est échoué');
+    }
+
+})
+/* #################################### end request get all user for admin #################################### */
+
+
 
 
 app.listen(2000,()=>{

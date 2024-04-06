@@ -5,14 +5,20 @@ const Schema = mongoose.Schema
 const PropertySchema = new Schema({
     nom: String,
     type: String,
+    CodeImmo : String,
     description: String,
-    adresse:{
-        region : String,
-        ville :String,
-        zone : String,
-        gps : String,
+    region : String,
+    ville :String,
+    zone : String,
+    gps : String,
+    photos: {
+        imgPrincipal : String,
+        imgSecondaire1 : String,
+        imgSecondaire2 : String,
+        imgSecondaire3 : String,
+        imgSecondaire4 : String,
     },
-    photos: [String],
+    ImgDocCertificat: String,
     evaluer:{
         value: String,
         listeEvaluateurs:[
@@ -28,6 +34,7 @@ const PropertySchema = new Schema({
         {
             idClient :String,
             nomComplet : String,
+            ImgClient : String,
             raison : String,
             justification : String,
             dateSignal: String,
@@ -36,7 +43,7 @@ const PropertySchema = new Schema({
     operation : String,
     IsLocation:{
         valueLoc : Boolean,
-        season : String,
+        periode : String,
         prix: Number,
     },
     IsVendre : {
@@ -55,6 +62,7 @@ const PropertySchema = new Schema({
             piscine : Boolean,
         }
     },
+    idProprietaire: String,
     proprietaireDetail:{
         idProp: String,
         nomComplet: String,
@@ -64,6 +72,7 @@ const PropertySchema = new Schema({
     },
     DateCreation : String,
     prixGlobal: Number,
+    statutImmo: String,
     offreDemande:[
         {
             idDmd : String,

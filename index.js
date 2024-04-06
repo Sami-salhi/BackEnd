@@ -54,6 +54,8 @@ function generateCodeActivation() {
  return activationCode;
 }
 
+
+
 app.get("/code",  (req,res)=>{
     let code =  generateCodeConfirmation();
     res.send(code);
@@ -115,53 +117,163 @@ app.post("/Createuser",async (req,res)=>{
 
 
 /* manipulation property */
+/* ################### start function generate code immo ################### */
+function generateCodeNewImmo() {
+    const numberCode = "012345678abcdefghijklmnopqrstuvwxyz";
+    let CodeImmo ="";
+    for(let i = 0;i<8;i++){
+        CodeImmo += numberCode[Math.floor(Math.random()*numberCode.length)];
+    }
+ return CodeImmo;
+}
+/* ################### end function tgenerate code immo ################### */
 
-/* request new property and save*/
-app.post("/createProperty",async (req,res)=>{
-    const newProperty = new Property()
+/* ################### start function testing is residsence ou non ################### */
+function IsResidence(typeImmo) {
+    switch (typeImmo) {
+        case 'Appartement':
+            return true;
+            break;
+        case 'Bureau':
+            return false;
+            break;
+        case 'Local commercial':
+            return false;
+            break;
+        case 'duplex':
+            return true;
+            break;
+        case 'Entrepot':
+            return false;
+            break;
+        case 'Etage de villa':
+            return true;
+            break;
+        case 'Local industriel':
+            return false;
+            break;
+        case 'Immeuble':
+            return true;
+            break;
+        case 'Maison':
+            return true;
+            break;
+        case 'Studio':
+            return false;
+            break;
+        case 'Terrain':
+            return false;
+            break;
+        case 'Villa':
+            return true;
+            break;
+        case "Maison d'hote":
+            return true;
+            break;
+            
+        default:
+            return false;
+    }
+}
+function PiscineIsExist(pis) {
+    if(pis ==="Oui"){
+        return true
+    }else{
+        return false
+    }
+    
+}
+/* ################### end function testing is residsence ou non ################### */
+
+/* ################### start request new property and save ################### */
+app.post("/aaqari/api/proprietaire/createProperty", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
     const data = req.body;
-    newProperty.nom ="villa 2"
-    newProperty.type = "residence"
-    newProperty.description ="villa contient de 6 chambre blablabla "
+    const currentTime = new Date();
+    const formattedDate = format(currentTime, 'dd/MM/yyyy HH:mm');
+    const opt ="vendre" /* location */
+    try {
+        const newProperty = new Property()
 
-    newProperty.adresse.region = "kasserine"
-    newProperty.adresse.ville ="foussana"
-    newProperty.adresse.zone =""
-    newProperty.adresse.gps = ""
+        newProperty.nom ="villa 2"
+        newProperty.type = "residence"
+        newProperty.CodeImmo=generateCodeNewImmo()
+        newProperty.description ="villa contient de 6 chambre blablabla "
 
-    newProperty.photos =["img1.jpg","img2.jpg","img3.jpg"]
-    newProperty.operation ="achat"
+        newProperty.region = "kasserine"
+        newProperty.ville ="foussana"
+        newProperty.zone =""
+        newProperty.gps = ""
 
-    newProperty.IsLocation.valueLoc = true
-    newProperty.IsLocation.season = "3mois"
-    newProperty.IsLocation.prix = 1500
+        newProperty.ImgDocCertificat = "doc.1"
+        newProperty.photos.imgPrincipal = "immo.png"
+        newProperty.photos.imgSecondaire1 = "immo1.png"
+        newProperty.photos.imgSecondaire2 = "immo2.png"
+        newProperty.photos.imgSecondaire3 = "immo3.png"
+        newProperty.photos.imgSecondaire4 = "immo4.png"
 
-    newProperty.IsVendre.valueVendre = false
-    newProperty.IsVendre.prix = 0
+        newProperty.operation ="achat"
+        if(opt ==="location"){
+            newProperty.IsLocation.valueLoc = true
+            newProperty.IsLocation.periode = "mois"
+            newProperty.IsLocation.prix = 1500
+        }else{
+            newProperty.IsLocation.valueLoc = false
+            newProperty.IsLocation.periode = ""
+            newProperty.IsLocation.prix = 0
+        }
+        
+        if(opt ==="vendre"){
+            newProperty.IsVendre.valueVendre = true
+            newProperty.IsVendre.prix = 1500
+        }else{
+            newProperty.IsVendre.valueVendre = false
+            newProperty.IsVendre.prix = 0
+        }
+        
 
-    newProperty.features.espace = "200mettre"
+        newProperty.features.espace = "200mettre"
+        const resid ="Maison d'hote"
+        const IsResid =IsResidence(resid);
+        if(IsResid){
+            newProperty.IsResidence.ValueResid = true
+            newProperty.IsResidence.nbChambre = 6
+            newProperty.IsResidence.specification.bedRoom = 7
+            newProperty.IsResidence.specification.piscine = PiscineIsExist("Non")
+        }else{
+            newProperty.IsResidence.ValueResid = false
+            newProperty.IsResidence.nbChambre = 0
+            newProperty.IsResidence.specification.bedRoom = 0
+            newProperty.IsResidence.specification.piscine = false
+        }
+        
 
-    newProperty.IsResidence.ValueResid = true
-    newProperty.IsResidence.nbChambre = 6
-    newProperty.IsResidence.specification.bedRoom = 7
-    newProperty.IsResidence.specification.piscine = true
+        newProperty.idProprietaire = "123456789"
+        newProperty.proprietaireDetail.idProp ="123456789"
+        newProperty.proprietaireDetail.nomComplet="sami salhi"
+        newProperty.proprietaireDetail.imgProfil="12536.jpg"
+        newProperty.proprietaireDetail.tel = "63789521"
+        newProperty.proprietaireDetail.email = "salhi bilel"
 
-    newProperty.proprietaireDetail.idProp ="123456789"
-    newProperty.proprietaireDetail.nomComplet="sami salhi"
-    newProperty.proprietaireDetail.imgProfil="12536.jpg"
-    newProperty.proprietaireDetail.tel = "63789521"
-    newProperty.proprietaireDetail.email = "salhi bilel"
-
-    newProperty.DateCreation ="12/3/2024"
-    newProperty.prixGlobal = 1500
+        newProperty.DateCreation =formattedDate
+        newProperty.prixGlobal = 1500
+        newProperty.statutImmo ="en attente"
 
 
-    await newProperty.save()
+        /*await newProperty.save()*/
 
-    res.send("property created successfilly")
+        res.send({etat , newProperty})
+        
+    } catch (error) {
+        const etat = statusRequest("500" , "echec");
+        res.send({etat})
+    }
+    
+
+    
 
 })
-
+/* ################### end request new property and save ################### */
 
 
 /* request get all property*/
@@ -402,12 +514,18 @@ app.post("/aaqari/api/connexionTest",cors() , async (req,res)=>{
         const etat = statusRequest("404" , "utilisateur n'exist pas");
         return res.send({etat}).json();
     }
+    
 
     const isPasswordCorrect = await bcrypt.compare(data.password ,user.auth.password);
     if(!isPasswordCorrect){
         const etat = statusRequest("400" , "Mot de passe ou nom d’utilisateur erroné");
         return res.send({etat}).json();
-    } 
+    }
+    
+    if(user.EtatCompte ==="ban") {
+        const etat = statusRequest("405" , "Compte est banned");
+        return res.send({etat}).json();
+    }
 
     
     const{isAdmin, ...otherDetails } = user._doc;
@@ -900,19 +1018,102 @@ app.get("/aaqari/api/admin/allUser" ,cors(),async (req,res)=>{
     const etat = statusRequest("200" , "success");
     try {
     const users = await Utilisateurs.find();
-   /* if(!users) {
-        const etat = statusRequest("404" , "aucun utilisateur existe");
-        return res.send({etat}).json();
-    }*/
 
     res.send({etat , users});
+    }
+    catch(err){
+        res.status(500).send('suspendre de compte utilisateur est échoué');
+    }
+
+})
+/* #################################### end request get all user for admin #################################### */
+
+/* #################################### start admin ban compte user #################################### */
+app.put("/aaqari/api/admin/ban/compteUser" ,cors(),async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    try {
+    const user = await Utilisateurs.findByIdAndUpdate(data.userId);
+    if(!user){
+        const etat = statusRequest("404" , "user n'existe pas");
+        return res.send({etat}).json();
+    }
+    user.EtatCompte = "ban"
+    await user.updateOne(user) ;
+   
+
+    res.send({etat , user});
     }
     catch(err){
         res.status(500).send('oops recuperation de users est échoué');
     }
 
 })
-/* #################################### end request get all user for admin #################################### */
+
+app.put("/aaqari/api/admin/activate/compteUser" ,cors(),async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    try {
+    const user = await Utilisateurs.findByIdAndUpdate(data.userId);
+    if(!user){
+        const etat = statusRequest("404" , "user n'existe pas");
+        return res.send({etat}).json();
+    }
+    user.EtatCompte = "Active"
+    await user.updateOne(user) ;
+   
+
+    res.send({etat , user});
+    }
+    catch(err){
+        res.status(500).send('oops recuperation de users est échoué');
+    }
+
+})
+
+
+/* #################################### end admin ban compte user #################################### */
+
+
+/* #################################### start admin update data compte user #################################### */
+app.put("/aaqari/api/admin/update/data/compteUser" ,cors(),async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    const currentTime = new Date();
+    const formattedDate = format(currentTime, 'dd/MM/yyyy HH:mm');
+
+    try {
+    const user = await Utilisateurs.findByIdAndUpdate(data.userId);
+    if(!user){
+        const etat = statusRequest("404" , "user n'existe pas");
+        return res.send({etat}).json();
+    }
+
+    user.nom = data.nom
+    user.prenom = data.prenom
+    user.DateNaissance = data.dateNass
+    user.ComeQui = data.comeQui
+    user.Cin = data.cin
+    user.NumTel = data.tel
+    user.userName = data.gmail
+    user.auth.email = data.gmail
+
+    const salt = bcrypt.genSaltSync(10);
+    const PassHash = bcrypt.hashSync(data.newPass,salt);
+
+    user.auth.password = PassHash
+    user.auth.dateModification = formattedDate
+
+    await user.updateOne(user);
+    res.send({etat , user});
+    }
+    catch(err){
+        res.status(500).send('oops recuperation de users est échoué');
+    }
+
+})
+/* #################################### end admin update data compte user #################################### */
+
 
 
 

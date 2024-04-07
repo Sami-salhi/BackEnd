@@ -183,6 +183,680 @@ function PiscineIsExist(pis) {
     }
     
 }
+function isIndustrielle(type) {
+    if(type === "Local industriel"){
+        return true
+    }else{
+        return false
+    }   
+}
+function IsStudio(type) {
+    if(type === "Studio"){
+        return true
+    }else{
+        return false
+    }   
+}
+function IsTerrain(type) {
+    if(type === "Terrain"){
+        return true
+    }else{
+        return false
+    } 
+}
+function IsZoneTouristique(type){
+    if(type === "Zone touristique"){
+        return true
+    }else{
+        return false
+    } 
+}
+function IsLocalCommercial(type){
+    if(type === "Local commercial"){
+        return true
+    }else{
+        return false
+    } 
+}
+function IsBureau(type) {
+    if(type === "Bureau"){
+        return true
+    }else{
+        return false
+    }
+}
+function testNbre(value){
+    if(value > 0){
+        return true
+    }else{
+        return false
+    }
+
+}
+function testValue(value){
+    if(value === "oui"){
+        return true
+    }else{
+        return false
+    }
+}
+async function generateDescriptionImmo(typeImmo , data) {
+    /* #################### start description for appartement #################### */
+    var salleDeBains =""
+    var bedRoom =""
+    var cuisine =""
+    var salans=""
+    var terrasse =""
+    var mer =""
+    var resImmeuble =""
+  if(testNbre(data.bain)){
+        salleDeBains =data.bain+" salle de bain";
+  }else{
+        salleDeBains ="";
+  }
+
+  if(testNbre(data.bedRoom)){
+        bedRoom =", "+data.bedRoom+" chambre à coucher ";
+    }else{
+        bedRoom ="";
+    }
+
+    if(testNbre(data.cuisine)){
+        cuisine =", "+"une cuisine ";
+    }else{
+        cuisine ="";
+    }
+
+    if(data.salans == 1){
+        salans =", un salans ";
+    }else if(data.salans > 1){
+        salans =", "+data.salans+" salans ";
+    }
+    else{
+        salans ="";
+    }
+
+    if(testNbre(data.terrasse)){
+        terrasse =", une terrasse avec un vue imprenable ";
+    }else{
+        terrasse ="";
+    }
+    if(testValue(data.mer)){
+        mer=" sur la mer"
+    }else{
+        mer=""
+    }
+    if(testValue(data.resImmeuble)){
+        resImmeuble=" , l'appartement est immeublé "
+    }else{
+        resImmeuble =""
+    }
+    /* #################### end description for appartement #################### */
+
+     /* #################### start description for bureau #################### */
+        var lumineux =""
+        var spacieux =""
+        var bureaulumineuxSpacieux=""
+        var Approche =""
+        var concat=""
+        var ApprocheTransportPublicText =""
+        var ApprocheAdministrationsText =""
+        if(testValue(data.isBureauLumineux)){
+            lumineux=" lumineux "
+        }else{
+            lumineux =""
+        }
+        if(testValue(data.isBureauSpacieux)){
+            spacieux=" spacieux "
+        }else{
+            spacieux =""
+        }
+        if(testValue(data.isBureauSpacieux) || testValue(data.isBureauLumineux)){
+            bureaulumineuxSpacieux=" . Le bureau est"
+        }else{
+            bureaulumineuxSpacieux =""
+        }
+        var complement =""
+        if(bureaulumineuxSpacieux !=""){
+            complement = ",avec un de grandes fenetres"
+        }else{
+            complement=""
+        }
+
+        if(testValue(data.isBureauApprocheTransportPublic) || testValue(data.isBureauApprocheAdministrations)){
+            Approche=" à proximité "
+        }else{
+            Approche =""
+        }
+        if(testValue(data.isBureauApprocheTransportPublic) && testValue(data.isBureauApprocheAdministrations)){
+            concat=" et"
+        }else{
+            concat =""
+        }
+
+        if(testValue(data.isBureauApprocheTransportPublic)){
+            ApprocheTransportPublicText=" des transports en commun"
+        }else{
+            ApprocheTransportPublicText =""
+        }
+        if(testValue(data.isBureauApprocheAdministrations)){
+            ApprocheAdministrationsText=" des administrations "
+        }else{
+            ApprocheAdministrationsText =""
+        }
+
+        var pieceBureau = 0
+        var kitchenetteBureau=""
+        var SalleAttenteBureau=""
+        var SanitaireBureau =""
+        if(testValue(data.isBureauSpecificationkitchenette)){
+            pieceBureau=pieceBureau+1 ;
+            kitchenetteBureau = " kitchenette";
+        }
+        if(testValue(data.isBureauSpecificationSalleAttente)){
+            pieceBureau=pieceBureau+1 ;
+            SalleAttenteBureau=" salle d'attente";
+        }
+        if(testValue(data.isBureauSpecificationSanitaire)){
+            pieceBureau=pieceBureau+1 ;
+            SanitaireBureau =" sanitaire"
+        }
+        var TextBureauPieces =""
+        if(testValue(data.isBureauSpecificationkitchenette) || testValue(data.isBureauSpecificationSalleAttente) || testValue(data.isBureauSpecificationSanitaire)){
+            TextBureauPieces=" dispose de "+pieceBureau+" pièces, d'une "
+        }else{
+            TextBureauPieces =""
+        }
+
+        var bureauImmeublé=""
+        if(testValue(data.isBureauImmeubleRecent)){
+            bureauImmeublé=". Situé dans un immeuble récent";
+        }else{
+            bureauImmeublé="";
+        }
+     /* #################### end description for bureau #################### */
+
+     /* #################### start description for local commercial #################### */
+        var ZoneCommAchalandeeText =""
+        if(testValue(data.LocalCommZoneCommAchalandee)){
+            ZoneCommAchalandeeText=". Le local est idéalement situé a zone commercante achanlandée ";
+        }else{
+            ZoneCommAchalandeeText="";
+        }
+
+        var proximité=""
+        var TransportOublic=""
+        var parking=""
+        if(testValue(data.LocalCommTransportPublic) || testValue(data.LocalCommParking)){
+            proximité=", à proximité";
+        }else{
+            proximité="";
+        }
+
+        var concatProximité =""
+        if(testValue(data.LocalCommTransportPublic) && testValue(data.LocalCommParking)){
+            concatProximité=" et ";
+        }else{
+            concatProximité="";
+        }
+
+        if(testValue(data.LocalCommTransportPublic)){
+            TransportOublic=" des transports en commun ";
+        }else{
+            TransportOublic="";
+        }
+        if(testValue(data.LocalCommParking)){
+            parking=" des parkings ";
+        }else{
+            parking="";
+        }
+
+        var LuniSpacieux =""
+        if(testValue(data.LocalCommLumineux) || testValue(data.LocalCommSpacieux)){
+            LuniSpacieux=". Il est";
+        }else{
+            LuniSpacieux="";
+        }
+
+        var ConcatLumiSpacieux =""
+        if(testValue(data.LocalCommLumineux) && testValue(data.LocalCommSpacieux)){
+            ConcatLumiSpacieux="et";
+        }else{
+            ConcatLumiSpacieux="";
+        }
+
+        var LocCommLumineux =""
+        var LocCommSpacieux =""
+        if(testValue(data.LocalCommLumineux)){
+            LocCommLumineux=" lumineux ";
+        }else{
+            LocCommLumineux="";
+        }
+        if(testValue(data.LocalCommSpacieux)){
+            LocCommSpacieux=" spacieux ";
+        }else{
+            LocCommSpacieux="";
+        }
+        var complement2=""
+        if(LuniSpacieux !==""){
+            complement2=", avec une grande vitrine et une surface de vente aménagée."
+        }
+     /* #################### end description for local commercial #################### */
+
+     /* #################### start description for  duplex #################### */
+        var packingResid =""
+        if(testValue(data.parking)){
+            packingResid=" un parking.";
+        }else{
+            packingResid="";
+        }
+        var merDuplex =""
+        if(testValue(data.mer)){
+            merDuplex=" la mer"
+        }else{
+            merDuplex=""
+        }
+        var merParking =""
+        if(testValue(data.parking) || testValue(data.mer)){
+            merParking="donnant sur";
+        }else{
+            merParking="";
+        }
+
+        var concatMerParking =""
+        if(testValue(data.parking) && testValue(data.mer)){
+            concatMerParking=", et";
+        }else{
+            concatMerParking="";
+        }
+
+        var piscineExist =""
+        if(testValue(data.piscine)){
+            piscineExist=" avec un piscine";
+        }else{
+            piscineExist="";
+        }
+        var jardinExist =""
+        if(testValue(data.jardin)){
+            jardinExist=" & comporte un jardin";
+        }else{
+            jardinExist="";
+        }
+     /* #################### end description for duplex #################### */
+
+     /* #################### start description for local industrie #################### */
+        var BureauxIndustrie =""
+        var sanitairesIndustrie = ""
+        var parkingIndustrie =""
+        var situeZoneIndustrie =""
+        if(testValue(data.BureauxContentIndustrie)){
+            BureauxIndustrie=" de bureaux,";
+        }else{
+            BureauxIndustrie="";
+        }
+
+        if(testValue(data.sanitairesContentIndustrie)){
+            sanitairesIndustrie=" de sanitaire, ";
+        }else{
+            sanitairesIndustrie="";
+        }
+
+        if(testValue(data.parkingContentIndustrie)){
+            parkingIndustrie=" d'un parking,";
+        }else{
+            parkingIndustrie="";
+        }
+
+        if(testValue(data.situeZoneIndustrie)){
+            situeZoneIndustrie=". Situé dans une zone industrielle accessible,";
+        }else{
+            situeZoneIndustrie="";
+        }
+     /* #################### end description for local industrie #################### */
+
+      /* #################### start description for Maison #################### */
+      var concatJardinCarage= ""
+      if(jardinExist !="" && testValue(data.garage)){
+        concatJardinCarage=" et"
+      }
+    var comporteMaison=""
+      if(testValue(data.jardin) || testValue(data.garage)){
+        comporteMaison=" comporte"
+      }else{
+        comporteMaison=""
+      }
+        var garage = ""
+        if(testValue(data.garage)){
+            garage=" un carage ";
+        }else{
+            garage="";
+        }
+
+        var jardin = ""
+        if(testValue(data.jardin)){
+            jardin=" un jardin ";
+        }else{
+            jardin="";
+        }
+       /* #################### end description for Maison #################### */
+
+       /* #################### start description for studio #################### */
+        var StudioMeuble =""
+        if(testValue(data.StudioMeublé)){
+            StudioMeuble="meublé";
+        }else{
+            StudioMeuble="";
+        }
+        var studioLumi = ""
+        if(testValue(data.StudioLumineux)){
+            studioLumi="lumineux";
+        }else{
+            studioLumi="";
+        }
+
+        var studioSpaciaux = ""
+        if(testValue(data.StudioSpacieux)){
+            studioSpaciaux="spacieux";
+        }else{
+            studioSpaciaux="";
+        }
+
+        var nbrePersonne = ""
+        if(data.StudioNbrePersoneMax === 1){
+            nbrePersonne="un personne";
+        }else{
+            nbrePersonne="de "+data.StudioNbrePersoneMax+" personne";
+        }
+        var contentStudio =""
+        if(testValue(data.StudioSpacieux) || testValue(data.StudioLumineux)){
+            contentStudio=". Le studio est ";
+        }else{
+            contentStudio="";
+        }
+        var speci =""
+        if(contentStudio !="" ){
+            speci=" et dispose d'une "
+        }else{
+            speci=""
+        }
+        var cuisineStudio =""
+        var salleDeBainStudio =""
+        var terraceStudio =""
+        if(testValue(data.StudioSpecificationCuisine)){
+            cuisineStudio="un cuisine équipée";
+        }else{
+            cuisineStudio="";
+        }
+
+        if(testValue(data.StudioSpecificationSalleDeBain)){
+            salleDeBainStudio=" salle de bain";
+        }else{
+            salleDeBainStudio="";
+        }
+
+        if(testValue(data.StudioSpecificationTerrace)){
+            terraceStudio=" un terrasse";
+        }else{
+            terraceStudio="";
+        }
+       /* #################### end description for studio #################### */
+    switch (typeImmo) {
+        case 'Appartement':
+             
+            return typeImmo+" à "+data.region+" est un appartement moderne de "+data.espace+" m² située à ville "+data.ville+". L'appartement dispose de "+data.NbreChambre+" chambres , "+salleDeBains+bedRoom+
+            cuisine+salans+terrasse+mer+resImmeuble+" Entiérement rénovée avec des matériaux traditionnels"+" , il est idéal pour un peronne/couple ou pour les vaccances";
+            break;
+        case 'Bureau':
+           
+            return typeImmo+lumineux+" à "+data.region+"  est un bureau de "+data.espace+" m² située à ville "+data.ville+" ,"+Approche+ApprocheTransportPublicText+concat+ApprocheAdministrationsText+
+            bureaulumineuxSpacieux+lumineux+spacieux+complement+TextBureauPieces+kitchenetteBureau+SalleAttenteBureau+SanitaireBureau+bureauImmeublé+", il est idéal pour une profession libérale ou une petite entreprise.";
+            break;
+        case 'Local commercial':
+          
+            return typeImmo+" à "+data.region+" est un local commercial attractif de "+data.espace+" m² située à ville "+data.ville+ZoneCommAchalandeeText+proximité+TransportOublic+concatProximité+parking+
+            LuniSpacieux+LocCommLumineux+ConcatLumiSpacieux+LocCommSpacieux+complement2+". Il est idéal pour une boutique, bureau ou un restaurant...";
+            break;
+        case 'duplex':
+           
+            return typeImmo+" moderne à "+data.region+" est un duplex moderne de "+data.espace+" m² située à ville "+data.ville+". Le duplex dispose de "+data.NbreChambre+" chambres , "+salleDeBains+bedRoom+
+            cuisine+"équipée"+salans+terrasse+merParking+merDuplex+concatMerParking+packingResid+". Situé dans une résidence sécurisée"+piscineExist+jardinExist+". Il est idéal pour une famille ou pour des vacances.";
+            break;
+        case 'Entrepot':
+           
+            return typeImmo+" moderne à "+data.region+" L'efficase est un entrepot moderne de "+data.espace+" m² située à ville "+data.ville+". L'entrepot est construit en matériaux durables et dispose d'une grande surface de stockage,"+
+            "des bureaux, de quais de déchargement et d'un parking."+" Il est idéal pour une activité de stockage, des distribution ou de logistique";
+            break;
+        case 'Etage de villa':
+            
+            return typeImmo+" moderne à "+data.region+" est un etage de villa moderne de "+data.espace+" m² située à ville "+data.ville+". L'etage de villa dispose de "+data.NbreChambre+" chambres , "+salleDeBains+bedRoom+
+            cuisine+salans+terrasse+merParking+merDuplex+concatMerParking+packingResid+". Situé dans une ville sécurisée"+piscineExist+jardinExist+". Il est idéal pour une famille ou pour des vacances.";
+            break;
+        case 'Local industriel':
+            
+            return typeImmo+" moderne à "+data.region+" Le spaciaux est un Local industriel moderne de "+data.espace+" m² située à ville "+data.ville+". le local dispose d'un grand espace ouvert,"+BureauxIndustrie+sanitairesIndustrie+
+            parkingIndustrie+situeZoneIndustrie+" Il est idéal pour une activité de production, de stockage ou de distribution.";
+            break;
+        case 'Immeuble':
+            
+            return typeImmo+" moderne à "+data.region+" Le complexe est un immeuble moderne de "+data.espace+" m² située à ville "+data.ville+". L'immeuble dispose de "+data.NbreChambre+" chambres , "+salleDeBains+bedRoom+
+            cuisine+salans+terrasse+mer+". Il est idéal pour une famille ou pour des vacances.";
+            break;
+        case 'Maison':
+        
+            return typeImmo+" moderne à "+data.region+"  est un maison moderne de "+data.espace+" m² située à ville "+data.ville+". La maison dispose de "+data.NbreChambre+" chambres , "+salleDeBains+bedRoom+
+            cuisine+salans+terrasse+". Situé dans une ville"+comporteMaison+jardin+concatJardinCarage+garage+". Il est idéal pour une famille ou pour des vacances.";
+            break;
+        case 'Studio':
+          
+            return typeImmo+" "+StudioMeuble+" à "+data.region+" charmant studio "+StudioMeuble+" de "+data.espace+" m² située à ville "+data.ville+". Ce studio est idéal pour "+nbrePersonne+
+            ". Il est situé dans un quartier calme et proche de toutes les commodités"+contentStudio+studioLumi+studioSpaciaux+speci+cuisineStudio+salleDeBainStudio+terraceStudio;
+            break;
+        case 'Terrain':
+         
+            return ;
+            break;
+        case 'Villa':
+         
+            return ;
+            break;
+        case "Maison d'hote":
+            
+            return ;
+            break;
+            
+        default:
+            
+            return ;
+    }
+    
+}
+function jardin(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function garage(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function mer(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function parking(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+
+function BureauxContentIndustrie(value) {
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function sanitairesContentIndustrie(value) {
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function situeZoneIndustrie(value) {
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+
+function zoneTouristContentPlage(value) {
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function zoneTouristOffreHotel(value) {
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function zoneTouristOffreRestaurant(value) {
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function zoneTouristOffreBars(value) {
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function zoneTouristOffreCentreCommerciaux(value) {
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function zoneTouristOffreActivitySportives(value) {
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+
+function StudioMeublé(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function StudioSpacieux(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function StudioLumineux(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function StudioSpecificationCuisine(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function StudioSpecificationSalleDeBain(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function StudioSpecificationTerrace(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+
+function TerainPlat(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function TerrainFertile(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function TerrainIrrigue(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function TerrainRouteGoudronnee(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function TerrainBoise(value){
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+
+function LocalCommercialContent(value) {
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
+function BureauContent(value) {
+    if(value ==="oui"){
+        return true
+    }else{
+        return false
+    }
+}
 /* ################### end function testing is residsence ou non ################### */
 
 /* ################### start request new property and save ################### */
@@ -191,32 +865,33 @@ app.post("/aaqari/api/proprietaire/createProperty", cors() ,async (req,res)=>{
     const data = req.body;
     const currentTime = new Date();
     const formattedDate = format(currentTime, 'dd/MM/yyyy HH:mm');
-    const opt ="vendre" /* location */
+    const opt =data.operation /*vendre"  location */
+    const type =data.typeProperty
     try {
         const newProperty = new Property()
 
-        newProperty.nom ="villa 2"
-        newProperty.type = "residence"
+        newProperty.nom =data.nomProperty
+        newProperty.type = data.typeProperty
         newProperty.CodeImmo=generateCodeNewImmo()
-        newProperty.description ="villa contient de 6 chambre blablabla "
+        newProperty.description = await generateDescriptionImmo(type , data)
 
-        newProperty.region = "kasserine"
-        newProperty.ville ="foussana"
-        newProperty.zone =""
-        newProperty.gps = ""
+        newProperty.region = data.region
+        newProperty.ville = data.ville
+        newProperty.zone = data.zone
+        newProperty.gps = data.gps
 
-        newProperty.ImgDocCertificat = "doc.1"
-        newProperty.photos.imgPrincipal = "immo.png"
-        newProperty.photos.imgSecondaire1 = "immo1.png"
-        newProperty.photos.imgSecondaire2 = "immo2.png"
-        newProperty.photos.imgSecondaire3 = "immo3.png"
-        newProperty.photos.imgSecondaire4 = "immo4.png"
+        newProperty.ImgDocCertificat = data.ImgDocCertificatProperty
+        newProperty.photos.imgPrincipal = data.ImgPropertyPrincipal
+        newProperty.photos.imgSecondaire1 = data.ImgPropertySecondaire1
+        newProperty.photos.imgSecondaire2 = data.ImgPropertySecondaire2
+        newProperty.photos.imgSecondaire3 = data.ImgPropertySecondaire3
+        newProperty.photos.imgSecondaire4 = data.ImgPropertySecondaire4
 
-        newProperty.operation ="achat"
+        newProperty.operation =opt
         if(opt ==="location"){
             newProperty.IsLocation.valueLoc = true
-            newProperty.IsLocation.periode = "mois"
-            newProperty.IsLocation.prix = 1500
+            newProperty.IsLocation.periode = data.peiode
+            newProperty.IsLocation.prix = data.prixLoc
         }else{
             newProperty.IsLocation.valueLoc = false
             newProperty.IsLocation.periode = ""
@@ -225,26 +900,153 @@ app.post("/aaqari/api/proprietaire/createProperty", cors() ,async (req,res)=>{
         
         if(opt ==="vendre"){
             newProperty.IsVendre.valueVendre = true
-            newProperty.IsVendre.prix = 1500
+            newProperty.IsVendre.prix = data.prixVendre
         }else{
             newProperty.IsVendre.valueVendre = false
             newProperty.IsVendre.prix = 0
         }
         
 
-        newProperty.features.espace = "200mettre"
-        const resid ="Maison d'hote"
-        const IsResid =IsResidence(resid);
+        newProperty.features.espace = data.espace
+        
+        const IsResid =IsResidence(type);
         if(IsResid){
             newProperty.IsResidence.ValueResid = true
-            newProperty.IsResidence.nbChambre = 6
-            newProperty.IsResidence.specification.bedRoom = 7
-            newProperty.IsResidence.specification.piscine = PiscineIsExist("Non")
+            newProperty.IsResidence.nbChambre = data.NbreChambre
+            newProperty.IsResidence.specification.bedRoom = data.bedRoom
+            newProperty.IsResidence.specification.piscine = PiscineIsExist(data.piscine)
+            newProperty.IsResidence.specification.cuisine = data.cuisine
+            newProperty.IsResidence.specification.terrasse = data.terrasse
+            newProperty.IsResidence.specification.salleDeBains = data.bain
+            newProperty.IsResidence.specification.salans = data.salans
+            newProperty.IsResidence.specification.jardin =  jardin(data.jardin)
+            newProperty.IsResidence.specification.garage = garage(data.garage)
+            newProperty.IsResidence.specification.immeuble = garage(data.resImmeuble)
+            newProperty.IsResidence.specification.environnement.mer = mer(data.mer)
+            newProperty.IsResidence.specification.environnement.parking = parking(data.parking)
         }else{
             newProperty.IsResidence.ValueResid = false
             newProperty.IsResidence.nbChambre = 0
             newProperty.IsResidence.specification.bedRoom = 0
             newProperty.IsResidence.specification.piscine = false
+            newProperty.IsResidence.specification.cuisine = 0
+            newProperty.IsResidence.specification.terrasse = 0
+            newProperty.IsResidence.specification.salleDeBains = 0
+            newProperty.IsResidence.specification.salans = 0
+            newProperty.IsResidence.specification.jardin = false
+            newProperty.IsResidence.specification.garage = false
+            newProperty.IsResidence.specification.immeuble = false
+            newProperty.IsResidence.specification.environnement.mer = false
+            newProperty.IsResidence.specification.environnement.parking = false
+        }
+        if(isIndustrielle(type)){
+            newProperty.IsIndustriel.ValueIndustrie = true
+            newProperty.IsIndustriel.content.Bureaux = BureauxContentIndustrie(data.BureauxContentIndustrie)
+            newProperty.IsIndustriel.content.sanitaires = sanitairesContentIndustrie(data.sanitairesContentIndustrie)
+            newProperty.IsIndustriel.content.parking = parking(data.parkingContentIndustrie)
+            newProperty.IsIndustriel.content.situeZoneIndustrie = situeZoneIndustrie(data.situeZoneIndustrie)
+
+        }else{
+            newProperty.IsIndustriel.ValueIndustrie = false
+            newProperty.IsIndustriel.content.Bureaux = false
+            newProperty.IsIndustriel.content.sanitaires = false
+            newProperty.IsIndustriel.content.parking = false
+            newProperty.IsIndustriel.content.situeZoneIndustrie = false
+        }
+        if(IsZoneTouristique(type)){
+            newProperty.IsZoneTouristique.ValueTouristique = true
+            newProperty.IsZoneTouristique.content.plage = zoneTouristContentPlage(data.zoneTouristContentPlage)
+            newProperty.IsZoneTouristique.offre.hotel = zoneTouristOffreHotel(data.zoneTouristOffreHotel)
+            newProperty.IsZoneTouristique.offre.restaurant = zoneTouristOffreRestaurant(data.zoneTouristOffreRestaurant)
+            newProperty.IsZoneTouristique.offre.bars = zoneTouristOffreBars(data.zoneTouristOffreBars)
+            newProperty.IsZoneTouristique.offre.centreCommerciaux = zoneTouristOffreCentreCommerciaux(data.zoneTouristOffreCentreCommerciaux)
+            newProperty.IsZoneTouristique.offre.activitySportives = zoneTouristOffreActivitySportives(data.zoneTouristOffreActivitySportives)
+        }else{
+            newProperty.IsZoneTouristique.ValueTouristique = false
+            newProperty.IsZoneTouristique.content.plage = false
+            newProperty.IsZoneTouristique.offre.hotel = false
+            newProperty.IsZoneTouristique.offre.restaurant = false
+            newProperty.IsZoneTouristique.offre.bars = false
+            newProperty.IsZoneTouristique.offre.centreCommerciaux = false
+            newProperty.IsZoneTouristique.offre.activitySportives = false
+        }
+
+        if(IsStudio(type)){
+            newProperty.IsStudio.ValueStudio = true
+            newProperty.IsStudio.content.maxNbrePersone = data.StudioNbrePersoneMax
+            newProperty.IsStudio.content.meublé = StudioMeublé(data.StudioMeublé)
+            newProperty.IsStudio.content.spacieux = StudioSpacieux(data.StudioSpacieux)
+            newProperty.IsStudio.content.lumineux = StudioLumineux(data.StudioLumineux)
+
+            newProperty.IsStudio.content.specification.cuisine = StudioSpecificationCuisine(data.StudioSpecificationCuisine)
+            newProperty.IsStudio.content.specification.salleDeBain = StudioSpecificationSalleDeBain(data.StudioSpecificationSalleDeBain)
+            newProperty.IsStudio.content.specification.terrace = StudioSpecificationTerrace(data.StudioSpecificationTerrace)
+
+        }else{
+            newProperty.IsStudio.ValueStudio = false
+            newProperty.IsStudio.content.maxNbrePersone = 0
+            newProperty.IsStudio.content.meublé = false
+            newProperty.IsStudio.content.spacieux = false
+            newProperty.IsStudio.content.lumineux = false
+
+            newProperty.IsStudio.content.specification.cuisine = false
+            newProperty.IsStudio.content.specification.salleDeBain = false
+            newProperty.IsStudio.content.specification.terrace = false
+        }
+        if(IsTerrain(type)){
+            newProperty.IsTerrain.ValueTerrain = true
+            newProperty.IsTerrain.content.espaceEnHectare = data.TerrainContentEspaceEnHectare
+            newProperty.IsTerrain.content.plat = TerainPlat(data.TerrainContentPlat)
+            newProperty.IsTerrain.content.fertile = TerrainFertile(data.TerrainContentFertile)
+            newProperty.IsTerrain.content.irriguéParPuits = TerrainIrrigue(data.TerrainContentIrrigueParPuits)
+            newProperty.IsTerrain.content.routeGoudronnée = TerrainRouteGoudronnee(data.TerrainContentRouteGoudronnee)
+            newProperty.IsTerrain.content.terrainBoisé = TerrainBoise(data.TerrainContentTerrainBoise)
+            newProperty.IsTerrain.content.typeArbres = data.TerrainContentTypeArbre
+        }else{
+            newProperty.IsTerrain.ValueTerrain = false
+            newProperty.IsTerrain.content.espaceEnHectare = 0
+            newProperty.IsTerrain.content.plat = false
+            newProperty.IsTerrain.content.fertile = false
+            newProperty.IsTerrain.content.irriguéParPuits = false
+            newProperty.IsTerrain.content.routeGoudronnée = false
+            newProperty.IsTerrain.content.terrainBoisé = false
+            newProperty.IsTerrain.content.typeArbres = ""
+        }
+        if(IsLocalCommercial(type)){
+            newProperty.isLocalCommercial.ValueLocalCommercial = true
+            newProperty.isLocalCommercial.content.ZoneCommAchalandee = LocalCommercialContent(data.LocalCommZoneCommAchalandee)
+            newProperty.isLocalCommercial.content.transportPublic = LocalCommercialContent(data.LocalCommTransportPublic)
+            newProperty.isLocalCommercial.content.parking = LocalCommercialContent(data.LocalCommParking)
+            newProperty.isLocalCommercial.content.lumineux = LocalCommercialContent(data.LocalCommLumineux)
+            newProperty.isLocalCommercial.content.spacieux = LocalCommercialContent(data.LocalCommSpacieux)
+        }else{
+            newProperty.isLocalCommercial.ValueLocalCommercial = false
+            newProperty.isLocalCommercial.content.ZoneCommAchalandee = false
+            newProperty.isLocalCommercial.content.transportPublic = false
+            newProperty.isLocalCommercial.content.parking = false
+            newProperty.isLocalCommercial.content.lumineux = false
+            newProperty.isLocalCommercial.content.spacieux = false
+        }
+        if(IsBureau(type)){
+            newProperty.IsBureau.ValueBureau = true
+            newProperty.IsBureau.content.ApprocheTransportPublic = BureauContent(data.isBureauApprocheTransportPublic)
+            newProperty.IsBureau.content.ApprocheAdministrations = BureauContent(data.isBureauApprocheAdministrations)
+            newProperty.IsBureau.content.lumineux = BureauContent(data.isBureauLumineux)
+            newProperty.IsBureau.content.spacieux = BureauContent(data.isBureauSpacieux)
+            newProperty.IsBureau.content.ImmeubleRecent = BureauContent(data.isBureauImmeubleRecent)
+            newProperty.IsBureau.content.specification.kitchenette = BureauContent(data.isBureauSpecificationkitchenette)
+            newProperty.IsBureau.content.specification.salleAttente = BureauContent(data.isBureauSpecificationSalleAttente)
+            newProperty.IsBureau.content.specification.sanitaire = BureauContent(data.isBureauSpecificationSanitaire)
+        }else{
+            newProperty.IsBureau.ValueBureau = false
+            newProperty.IsBureau.content.ApprocheTransportPublic = false
+            newProperty.IsBureau.content.ApprocheAdministrations = false
+            newProperty.IsBureau.content.lumineux = false
+            newProperty.IsBureau.content.spacieux = false
+            newProperty.IsBureau.content.ImmeubleRecent = false
+            newProperty.IsBureau.content.specification.kitchenette = false
+            newProperty.IsBureau.content.specification.salleAttente = false
+            newProperty.IsBureau.content.specification.sanitaire = false
         }
         
 

@@ -60,7 +60,91 @@ const PropertySchema = new Schema({
         specification:{
             bedRoom : Number,
             piscine : Boolean,
+            cuisine : Number,
+            terrasse : Number,
+            salleDeBains : Number,
+            salans : Number,
+            jardin : Boolean,
+            garage : Boolean,
+            immeuble : Boolean,
+            environnement : {
+                mer : Boolean,
+                parking : Boolean,
+            }
         }
+    },
+    IsIndustriel : {
+        ValueIndustrie : Boolean,
+        content:{
+            Bureaux : Boolean,
+            sanitaires : Boolean,
+            parking : Boolean,
+            situeZoneIndustrie : Boolean,
+        }
+    },
+    IsZoneTouristique : {
+        ValueTouristique : Boolean,
+        content :{
+            plage : Boolean,
+        },
+        offre:{
+            hotel : Boolean,
+            restaurant : Boolean,
+            bars : Boolean,
+            centreCommerciaux : Boolean,
+            activitySportives : Boolean,
+        }
+    },
+    IsStudio :{
+        ValueStudio : Boolean,
+        content : {
+            NbrePersoneMax : Number,
+            meublé : Boolean,
+            spacieux : Boolean,
+            lumineux : Boolean,
+            specification : {
+                cuisine : Boolean,
+                salleDeBain : Boolean,
+                terrace : Boolean,
+            },
+        }
+    },
+    IsTerrain : {
+        ValueTerrain : Boolean,
+        content : {
+            espaceEnHectare : Number,
+            plat : Boolean,
+            fertile : Boolean,
+            irriguéParPuits : Boolean,
+            routeGoudronnée : Boolean,
+            terrainBoisé : Boolean,
+            typeArbres : String,
+        },
+    },
+    isLocalCommercial : {
+        ValueLocalCommercial : Boolean,
+        content : {
+                ZoneCommAchalandee : Boolean,
+                transportPublic : Boolean,
+                parking : Boolean,
+                lumineux : Boolean,
+                spacieux : Boolean,
+        },
+    },
+    IsBureau : {
+        ValueBureau : Boolean,
+        content : {
+            ApprocheTransportPublic : Boolean,
+            ApprocheAdministrations : Boolean,
+            lumineux : Boolean,
+            spacieux : Boolean,
+            ImmeubleRecent : Boolean,
+            specification : {
+                kitchenette : Boolean,
+                salleAttente : Boolean,
+                sanitaire : Boolean,
+            },
+        },
     },
     idProprietaire: String,
     proprietaireDetail:{

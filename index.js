@@ -143,6 +143,9 @@ function IsResidence(typeImmo) {
         case 'duplex':
             return true;
             break;
+        case 'Ferme Agricole':
+            return false;
+            break;
         case 'Entrepot':
             return false;
             break;
@@ -198,7 +201,7 @@ function IsStudio(type) {
     }   
 }
 function IsTerrain(type) {
-    if(type === "Terrain"){
+    if(type === "Terrain" || type === "Ferme Agricole"){
         return true
     }else{
         return false
@@ -600,6 +603,142 @@ async function generateDescriptionImmo(typeImmo , data) {
             terraceStudio="";
         }
        /* #################### end description for studio #################### */
+
+       /* #################### start description for Terrain #################### */
+        var plattext =""
+        var fertileText=""
+
+        if(testValue(data.TerrainContentPlat)){
+            plattext=" plat";
+        }else{
+            plattext="";
+        }
+        
+        if(testValue(data.TerrainContentFertile)){
+            fertileText=" fertile";
+        }else{
+            fertileText="";
+        }
+
+        var specTerrain =""
+        if(testValue(data.TerrainContentFertile) || testValue(data.TerrainContentPlat)){
+            specTerrain=". Le terrain est";
+        }else{
+            specTerrain="";
+        }
+        var concatPlatFertile =""
+    
+        if(testValue(data.TerrainContentFertile) && testValue(data.TerrainContentPlat)){
+            concatPlatFertile=" et";
+        }else{
+            concatPlatFertile="";
+        }
+
+        var irrigueText =""
+        var routeGoudronneText =""
+        if(testValue(data.TerrainContentIrrigueParPuits)){
+            irrigueText=", irrigué par un puits ";
+        }else{
+            irrigueText="";
+        }
+
+        if(testValue(data.TerrainContentRouteGoudronnee)){
+            routeGoudronneText=", accessible par une route goudronnée .";
+        }else{
+            routeGoudronneText="";
+        }
+        var terrainBoiseText =""
+        if(testValue(data.TerrainContentTerrainBoise)){
+            terrainBoiseText=" Ce terrain est boisé ";
+        }else{
+            terrainBoiseText="";
+        }
+        var typeArbreText =""
+        if(terrainBoiseText != ""){
+            typeArbreText=" par des arbres de "+data.TerrainContentTypeArbre;
+        }else{
+            typeArbreText="";
+        }
+        /* #################### end description for Terrain #################### */
+
+        /* #################### start description for villa #################### */
+        var jardinPrive =""
+        if(testValue(data.jardin)){
+            jardinPrive=" un jardin aménagé ";
+        }else{
+            jardinPrive="";
+        }
+
+        var piscinePrive=""
+        if(testValue(data.piscine)){
+            piscinePrive=" une piscine privée ,";
+        }else{
+            piscinePrive="";
+        }
+        var carageVille =""
+        if(testValue(data.garage)){
+            carageVille=" un garage plus large";
+        }else{
+            carageVille="";
+        }
+        var concatJardinCrage =""
+        if(testValue(data.jardin) && testValue(data.garage)){
+            concatJardinCrage="et";
+        }else{
+            concatJardinCrage="";
+        }
+
+        var villaImmeble =""
+        if(testValue(data.resImmeuble)){
+            villaImmeble=". Entièrement meublée et équipé,";
+        }else{
+            villaImmeble="";
+        }
+        /* #################### end description for villa #################### */
+
+        /* #################### start description for zone touristique #################### */
+        var plageSable=""
+        if(testValue(data.zoneTouristContentPlage)){
+            plageSable=", ce immobiliers dispose un plages de sable fin,";
+        }else{
+            plageSable="";
+        }
+        var hotelOffre =""
+        var restaurantOffre =""
+        var barsOffre =""
+        var centreCommerciauxOffre =""
+        var activitySportivesxOffre =""
+
+        if(testValue(data.zoneTouristOffreHotel)){
+            hotelOffre="une large gamme d'hotels,";
+        }else{
+            hotelOffre="";
+        }
+
+        if(testValue(data.zoneTouristOffreRestaurant)){
+            restaurantOffre=" de restaurants,";
+        }else{
+            restaurantOffre="";
+        }
+
+        if(testValue(data.zoneTouristOffreBars)){
+            barsOffre=" de bars,";
+        }else{
+            barsOffre="";
+        }
+
+        if(testValue(data.zoneTouristOffreCentreCommerciaux)){
+            centreCommerciauxOffre=" de centres commerciaux ";
+        }else{
+            centreCommerciauxOffre="";
+        }
+
+        if(testValue(data.zoneTouristOffreActivitySportives)){
+            activitySportivesxOffre=". vous y trouvez également des activités sportives et nautiques pour tous les gouts.";
+        }else{
+            activitySportivesxOffre="";
+        }
+         /* #################### end description for zone touristique #################### */
     switch (typeImmo) {
         case 'Appartement':
              
@@ -653,20 +792,29 @@ async function generateDescriptionImmo(typeImmo , data) {
             break;
         case 'Terrain':
          
-            return ;
+            return typeImmo+" à "+data.region+" Le fertile est un terrain agricole de "+data.TerrainContentEspaceEnHectare+" hectares située à ville "+data.ville+", une region agricole de la tunisie"+
+            specTerrain+plattext+concatPlatFertile+fertileText+irrigueText+routeGoudronneText+terrainBoiseText+typeArbreText+". Il est idéal pour la culture de céréales, d'oliviers, de légumes ou de fruits...";
+            break;
+        case 'Ferme Agricole':
+         
+            return typeImmo+" à "+data.region+" La ferme prospère est une ferme agricole de "+data.TerrainContentEspaceEnHectare+" hectares située à "+data.ville+", une region agricole de la tunisie"+
+            specTerrain+plattext+concatPlatFertile+fertileText+irrigueText+routeGoudronneText+terrainBoiseText+typeArbreText+". La ferme dispose également d'une maison d'habitation et de plusieurs batiments agricoles.";
             break;
         case 'Villa':
          
-            return ;
+            return typeImmo+" Fleurie à "+data.region+" est une charmante villa de "+data.espace+" m² située à ville "+data.ville+", à proximité des commerces et des restaurant."+" La villa dispose de "+data.NbreChambre+" chambres , "+salleDeBains+bedRoom+
+            cuisine+","+piscinePrive+jardinPrive+concatJardinCrage+carageVille+villaImmeble+" Elle idéale pour une famille ou pour les vacances.";
             break;
         case "Maison d'hote":
             
-            return ;
+            return typeImmo+" moderne à "+data.region+" est un maison de "+data.espace+" m² située à ville "+data.ville+" La maison dispose de "+data.NbreChambre+" chambres , "+salleDeBains+bedRoom+cuisine+salans+terrasse
+            +comporteMaison+jardin+concatJardinCarage+garage+". Il est idéal pour une famille ou pour des vacances.";
             break;
             
         default:
             
-            return ;
+            return typeImmo+" à "+data.region+"."+data.nomProperty+" est immobiliere touristique située à ville "+data.ville+plageSable+" la zone touristique de "+data.ville+" sur le nom "+data.nomProperty+" offre ["+
+            hotelOffre+restaurantOffre+barsOffre+centreCommerciauxOffre+"]"+activitySportivesxOffre+data.nomProperty+" est idéale pour des vacances en famille, entre amis ou enre les couples.";
     }
     
 }
@@ -1050,19 +1198,24 @@ app.post("/aaqari/api/proprietaire/createProperty", cors() ,async (req,res)=>{
         }
         
 
-        newProperty.idProprietaire = "123456789"
-        newProperty.proprietaireDetail.idProp ="123456789"
-        newProperty.proprietaireDetail.nomComplet="sami salhi"
-        newProperty.proprietaireDetail.imgProfil="12536.jpg"
-        newProperty.proprietaireDetail.tel = "63789521"
-        newProperty.proprietaireDetail.email = "salhi bilel"
+        newProperty.idProprietaire = data.proprietaireID
+        newProperty.proprietaireDetail.idProp = data.proprietaireID
+        newProperty.proprietaireDetail.nomComplet= data.proprietaireNomComplet
+        newProperty.proprietaireDetail.imgProfil= data.proprietaireImgProfil
+        newProperty.proprietaireDetail.tel = data.proprietaireContactTel
+        newProperty.proprietaireDetail.email = data.proprietaireContactEmail
 
         newProperty.DateCreation =formattedDate
-        newProperty.prixGlobal = 1500
+        if(opt ==="location"){
+            newProperty.prixGlobal = data.prixLoc
+        }else{
+            newProperty.prixGlobal = data.prixVendre
+        }
+        
         newProperty.statutImmo ="en attente"
 
 
-        /*await newProperty.save()*/
+        await newProperty.save()
 
         res.send({etat , newProperty})
         

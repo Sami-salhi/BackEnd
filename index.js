@@ -1230,13 +1230,111 @@ app.post("/aaqari/api/proprietaire/createProperty", cors() ,async (req,res)=>{
 })
 /* ################### end request new property and save ################### */
 
+/* ################### start request get all proprietaire property ################### */
+app.post("/aaqari/api/proprietaire/getAllByIdProp",async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+  
+    try {
+        const AnnoncesImmo = await Property.find({ idProprietaire: data.idProp });
+
+        res.send({AnnoncesImmo});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+
+})
+/* ################### end  request get all proprietaire property ################### */
+
+
+/* ################### start request get all proprietaire property ################### */
+app.get("/aaqari/api/Admin/getAllNewProperty", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const attente = "en attente"
+  
+    try {
+        const NewAnnonces = await Property.find({ statutImmo: attente });
+
+        res.send({NewAnnonces,etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+
+})
+/* ################### end request get all proprietaire property ################### */
+
+
+/* ################### start request Approuver nouveau annonce immo par admin ################### */
+app.put("/aaqari/api/Admin/NewProperty/decision/Approuver", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    const idProperty = data.idProperty;
+  
+    try {
+        const AnnonceApprouver = await Property.findByIdAndUpdate(idProperty);
+
+        AnnonceApprouver.statutImmo = "publier" ;
+        await AnnonceApprouver.updateOne(AnnonceApprouver) ;
+
+        res.send({AnnonceApprouver,etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+
+})
+/* ################### end request Approuver nouveau annonce immo par admin ################### */
+
+/* ################### start request rejeter nouveau annonce immo par admin ################### */
+app.put("/aaqari/api/Admin/NewProperty/decision/Rejeter", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    const idProperty = data.idProperty;
+  
+    try {
+        const AnnonceApprouver = await Property.findByIdAndUpdate(idProperty);
+
+        AnnonceApprouver.statutImmo = "refuser" ;
+        await AnnonceApprouver.updateOne(AnnonceApprouver) ;
+
+        res.send({AnnonceApprouver,etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+
+})
+/* ################### end request rejeter nouveau annonce immo par admin ################### */
+
+
+/* ################### start request get property by id ################### */
+app.post("/aaqari/api/admin/getPorpertyById",async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+
+    const data = req.body;
+    const idProperty = data.idProperty;
+    try {
+        const propertyById = await Property.findById(idProperty);
+
+        res.send({propertyById,etat})
+    }
+    catch(err){
+        res.status(500).send('recuperation property by id is failled');
+    }
+
+})
+/* ################### end request get property by id ################### */
+
 
 /* request get all property*/
 app.get("/recupererAllProperty",async (req,res)=>{
     try {
     const propertyAll = await Property.find();
 
-    res.json(propertyAll);}
+    res.send({propertyAll});
+    }
     catch(err){
         res.status(500).send('Erreur interne du serveur');
     }

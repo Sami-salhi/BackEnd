@@ -146,7 +146,7 @@ const PropertySchema = new Schema({
             },
         },
     },
-    idProprietaire: String,
+    idProprietaire : String,
     proprietaireDetail:{
         idProp: String,
         nomComplet: String,

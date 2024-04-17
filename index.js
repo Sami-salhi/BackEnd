@@ -28,7 +28,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParsar());
 app.use(cors({
-    origin :"http://localhost:3000" || "http://192.168.1.129:3000",
+    origin :"http://localhost:3000" || "http://192.168.1.66:3000",
     methods:["GET", "POST", "PUT", "DELETE"],
     preflightContinue: false,
     optionsSuccessStatus: 200,
@@ -818,8 +818,8 @@ async function generateDescriptionImmo(typeImmo , data) {
     }
     
 }
-function jardin(value){
-    if(value ==="oui"){
+function ResidenceTest(value){
+    if(value ==="Oui"){
         return true
     }else{
         return false
@@ -847,8 +847,8 @@ function parking(value){
     }
 }
 
-function BureauxContentIndustrie(value) {
-    if(value ==="oui"){
+function industrielTest(value) {
+    if(value ==="Oui"){
         return true
     }else{
         return false
@@ -869,8 +869,8 @@ function situeZoneIndustrie(value) {
     }
 }
 
-function zoneTouristContentPlage(value) {
-    if(value ==="oui"){
+function zoneTouristTest(value) {
+    if(value ==="Oui"){
         return true
     }else{
         return false
@@ -912,8 +912,8 @@ function zoneTouristOffreActivitySportives(value) {
     }
 }
 
-function StudioMeublé(value){
-    if(value ==="oui"){
+function StudioTest(value){
+    if(value ==="Oui"){
         return true
     }else{
         return false
@@ -955,8 +955,8 @@ function StudioSpecificationTerrace(value){
     }
 }
 
-function TerainPlat(value){
-    if(value ==="oui"){
+function TerrainTest(value){
+    if(value ==="Oui"){
         return true
     }else{
         return false
@@ -992,14 +992,14 @@ function TerrainBoise(value){
 }
 
 function LocalCommercialContent(value) {
-    if(value ==="oui"){
+    if(value ==="Oui"){
         return true
     }else{
         return false
     }
 }
 function BureauContent(value) {
-    if(value ==="oui"){
+    if(value ==="Oui"){
         return true
     }else{
         return false
@@ -1062,16 +1062,16 @@ app.post("/aaqari/api/proprietaire/createProperty", cors() ,async (req,res)=>{
             newProperty.IsResidence.ValueResid = true
             newProperty.IsResidence.nbChambre = data.NbreChambre
             newProperty.IsResidence.specification.bedRoom = data.bedRoom
-            newProperty.IsResidence.specification.piscine = PiscineIsExist(data.piscine)
+            newProperty.IsResidence.specification.piscine = ResidenceTest(data.piscine)
             newProperty.IsResidence.specification.cuisine = data.cuisine
             newProperty.IsResidence.specification.terrasse = data.terrasse
             newProperty.IsResidence.specification.salleDeBains = data.bain
             newProperty.IsResidence.specification.salans = data.salans
-            newProperty.IsResidence.specification.jardin =  jardin(data.jardin)
-            newProperty.IsResidence.specification.garage = garage(data.garage)
-            newProperty.IsResidence.specification.immeuble = garage(data.resImmeuble)
-            newProperty.IsResidence.specification.environnement.mer = mer(data.mer)
-            newProperty.IsResidence.specification.environnement.parking = parking(data.parking)
+            newProperty.IsResidence.specification.jardin =  ResidenceTest(data.jardin)
+            newProperty.IsResidence.specification.garage = ResidenceTest(data.garage)
+            newProperty.IsResidence.specification.immeuble = ResidenceTest(data.resImmeuble)
+            newProperty.IsResidence.specification.environnement.mer = ResidenceTest(data.mer)
+            newProperty.IsResidence.specification.environnement.parking = ResidenceTest(data.parking)
         }else{
             newProperty.IsResidence.ValueResid = false
             newProperty.IsResidence.nbChambre = 0
@@ -1089,10 +1089,10 @@ app.post("/aaqari/api/proprietaire/createProperty", cors() ,async (req,res)=>{
         }
         if(isIndustrielle(type)){
             newProperty.IsIndustriel.ValueIndustrie = true
-            newProperty.IsIndustriel.content.Bureaux = BureauxContentIndustrie(data.BureauxContentIndustrie)
-            newProperty.IsIndustriel.content.sanitaires = sanitairesContentIndustrie(data.sanitairesContentIndustrie)
-            newProperty.IsIndustriel.content.parking = parking(data.parkingContentIndustrie)
-            newProperty.IsIndustriel.content.situeZoneIndustrie = situeZoneIndustrie(data.situeZoneIndustrie)
+            newProperty.IsIndustriel.content.Bureaux = industrielTest(data.BureauxContentIndustrie)
+            newProperty.IsIndustriel.content.sanitaires = industrielTest(data.sanitairesContentIndustrie)
+            newProperty.IsIndustriel.content.parking = industrielTest(data.parkingContentIndustrie)
+            newProperty.IsIndustriel.content.situeZoneIndustrie = industrielTest(data.situeZoneIndustrie)
 
         }else{
             newProperty.IsIndustriel.ValueIndustrie = false
@@ -1103,12 +1103,12 @@ app.post("/aaqari/api/proprietaire/createProperty", cors() ,async (req,res)=>{
         }
         if(IsZoneTouristique(type)){
             newProperty.IsZoneTouristique.ValueTouristique = true
-            newProperty.IsZoneTouristique.content.plage = zoneTouristContentPlage(data.zoneTouristContentPlage)
-            newProperty.IsZoneTouristique.offre.hotel = zoneTouristOffreHotel(data.zoneTouristOffreHotel)
-            newProperty.IsZoneTouristique.offre.restaurant = zoneTouristOffreRestaurant(data.zoneTouristOffreRestaurant)
-            newProperty.IsZoneTouristique.offre.bars = zoneTouristOffreBars(data.zoneTouristOffreBars)
-            newProperty.IsZoneTouristique.offre.centreCommerciaux = zoneTouristOffreCentreCommerciaux(data.zoneTouristOffreCentreCommerciaux)
-            newProperty.IsZoneTouristique.offre.activitySportives = zoneTouristOffreActivitySportives(data.zoneTouristOffreActivitySportives)
+            newProperty.IsZoneTouristique.content.plage = zoneTouristTest(data.zoneTouristContentPlage)
+            newProperty.IsZoneTouristique.offre.hotel = zoneTouristTest(data.zoneTouristOffreHotel)
+            newProperty.IsZoneTouristique.offre.restaurant = zoneTouristTest(data.zoneTouristOffreRestaurant)
+            newProperty.IsZoneTouristique.offre.bars = zoneTouristTest(data.zoneTouristOffreBars)
+            newProperty.IsZoneTouristique.offre.centreCommerciaux = zoneTouristTest(data.zoneTouristOffreCentreCommerciaux)
+            newProperty.IsZoneTouristique.offre.activitySportives = zoneTouristTest(data.zoneTouristOffreActivitySportives)
         }else{
             newProperty.IsZoneTouristique.ValueTouristique = false
             newProperty.IsZoneTouristique.content.plage = false
@@ -1122,13 +1122,13 @@ app.post("/aaqari/api/proprietaire/createProperty", cors() ,async (req,res)=>{
         if(IsStudio(type)){
             newProperty.IsStudio.ValueStudio = true
             newProperty.IsStudio.content.maxNbrePersone = data.StudioNbrePersoneMax
-            newProperty.IsStudio.content.meublé = StudioMeublé(data.StudioMeublé)
-            newProperty.IsStudio.content.spacieux = StudioSpacieux(data.StudioSpacieux)
-            newProperty.IsStudio.content.lumineux = StudioLumineux(data.StudioLumineux)
+            newProperty.IsStudio.content.meublé = StudioTest(data.StudioMeublé)
+            newProperty.IsStudio.content.spacieux = StudioTest(data.StudioSpacieux)
+            newProperty.IsStudio.content.lumineux = StudioTest(data.StudioLumineux)
 
-            newProperty.IsStudio.content.specification.cuisine = StudioSpecificationCuisine(data.StudioSpecificationCuisine)
-            newProperty.IsStudio.content.specification.salleDeBain = StudioSpecificationSalleDeBain(data.StudioSpecificationSalleDeBain)
-            newProperty.IsStudio.content.specification.terrace = StudioSpecificationTerrace(data.StudioSpecificationTerrace)
+            newProperty.IsStudio.content.specification.cuisine = StudioTest(data.StudioSpecificationCuisine)
+            newProperty.IsStudio.content.specification.salleDeBain = StudioTest(data.StudioSpecificationSalleDeBain)
+            newProperty.IsStudio.content.specification.terrace = StudioTest(data.StudioSpecificationTerrace)
 
         }else{
             newProperty.IsStudio.ValueStudio = false
@@ -1144,11 +1144,11 @@ app.post("/aaqari/api/proprietaire/createProperty", cors() ,async (req,res)=>{
         if(IsTerrain(type)){
             newProperty.IsTerrain.ValueTerrain = true
             newProperty.IsTerrain.content.espaceEnHectare = data.TerrainContentEspaceEnHectare
-            newProperty.IsTerrain.content.plat = TerainPlat(data.TerrainContentPlat)
-            newProperty.IsTerrain.content.fertile = TerrainFertile(data.TerrainContentFertile)
-            newProperty.IsTerrain.content.irriguéParPuits = TerrainIrrigue(data.TerrainContentIrrigueParPuits)
-            newProperty.IsTerrain.content.routeGoudronnée = TerrainRouteGoudronnee(data.TerrainContentRouteGoudronnee)
-            newProperty.IsTerrain.content.terrainBoisé = TerrainBoise(data.TerrainContentTerrainBoise)
+            newProperty.IsTerrain.content.plat = TerrainTest(data.TerrainContentPlat)
+            newProperty.IsTerrain.content.fertile = TerrainTest(data.TerrainContentFertile)
+            newProperty.IsTerrain.content.irriguéParPuits = TerrainTest(data.TerrainContentIrrigueParPuits)
+            newProperty.IsTerrain.content.routeGoudronnée = TerrainTest(data.TerrainContentRouteGoudronnee)
+            newProperty.IsTerrain.content.terrainBoisé = TerrainTest(data.TerrainContentTerrainBoise)
             newProperty.IsTerrain.content.typeArbres = data.TerrainContentTypeArbre
         }else{
             newProperty.IsTerrain.ValueTerrain = false
@@ -1266,6 +1266,24 @@ app.get("/aaqari/api/Admin/getAllNewProperty", cors() ,async (req,res)=>{
 /* ################### end request get all proprietaire property ################### */
 
 
+/* ################### start request get all proprietaire property ################### */
+app.get("/aaqari/api/Client/getAllPropertyPublie", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const attente = "publier"
+  
+    try {
+        const annonce = await Property.find({ statutImmo: attente });
+
+        res.send({annonce,etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+
+})
+/* ################### end request get all proprietaire property ################### */
+
+
 /* ################### start request Approuver nouveau annonce immo par admin ################### */
 app.put("/aaqari/api/Admin/NewProperty/decision/Approuver", cors() ,async (req,res)=>{
     const etat = statusRequest("200" , "success");
@@ -1311,6 +1329,24 @@ app.put("/aaqari/api/Admin/NewProperty/decision/Rejeter", cors() ,async (req,res
 
 /* ################### start request get property by id ################### */
 app.post("/aaqari/api/admin/getPorpertyById",async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+
+    const data = req.body;
+    const idProperty = data.idProperty;
+    try {
+        const propertyById = await Property.findById(idProperty);
+
+        res.send({propertyById,etat})
+    }
+    catch(err){
+        res.status(500).send('recuperation property by id is failled');
+    }
+
+})
+/* ################### end request get property by id ################### */
+
+/* ################### start request get property by id ################### */
+app.post("/aaqari/api/client/getPorpertyById",async (req,res)=>{
     const etat = statusRequest("200" , "success");
 
     const data = req.body;
@@ -1966,6 +2002,7 @@ app.post("/aaqari/api/utilisateur/property/demande",cors() ,async (req,res)=>{
     const idprop = data.idProperty;
     const opt = data.operation;
     const currentTime = new Date();
+    const formattedDate = format(currentTime, 'dd/MM/yyyy HH:mm');
 
     try {
         const propertyConcerne = await Property.findById(idprop);
@@ -2017,7 +2054,7 @@ app.post("/aaqari/api/utilisateur/property/demande",cors() ,async (req,res)=>{
             newDemande.IsLocation.DateFin = ""
         }
 
-        if(opt ==="achat"){
+        if(opt ==="vendre"){
             newDemande.IsAchat.valueAchat = true
             newDemande.IsAchat.montantPropose = data.montantPropose
         }else{
@@ -2027,12 +2064,12 @@ app.post("/aaqari/api/utilisateur/property/demande",cors() ,async (req,res)=>{
 
         newDemande.idConcernéProprietaire = data.IdProprietaire
         newDemande.CinProprietaire = data.CinProprietaire
-        newDemande.infoProprietaire.nom = data.nomProp
-        newDemande.infoProprietaire.prenom = data.prenomProp
+        newDemande.infoProprietaire.NomComplet = data.nomCompletProp
+
         newDemande.infoProprietaire.NumeroTel = data.numeroTelProp
         newDemande.infoProprietaire.gmail = data.gmailProp
 
-        newDemande.dateDemande = currentTime
+        newDemande.dateDemande = formattedDate
 
         newDemande.decision.valueDec = "en attente"
         newDemande.decision.dateDec = ""
@@ -2046,7 +2083,7 @@ app.post("/aaqari/api/utilisateur/property/demande",cors() ,async (req,res)=>{
             idClient : data.idClient,
             nomComplet : nomClientComplet,
             prixPropose : data.montantPropose,
-            dateOffre : currentTime,
+            dateOffre : formattedDate,
             statut : "en attente"
         })
 

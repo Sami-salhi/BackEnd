@@ -31,8 +31,7 @@ const DemandeSchema = new Schema({
     idConcernéProprietaire: String,
     CinProprietaire:String,
     infoProprietaire:{
-        nom : String,
-        prenom : String,
+        NomComplet : String,
         NumeroTel : String,
         gmail: String
     },

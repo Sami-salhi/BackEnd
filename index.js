@@ -1869,6 +1869,7 @@ app.put("/aaqari/api/utilisateur/signaler/property",cors(), async (req,res)=>{
     const etat = statusRequest("200" , "success");
     const idprop = data.idProperty;
     const currentTime = new Date();
+    const formattedDate = format(currentTime, 'dd/MM/yyyy HH:mm');
    
 
     try {
@@ -1881,9 +1882,10 @@ app.put("/aaqari/api/utilisateur/signaler/property",cors(), async (req,res)=>{
         property.signaler.push({
             idClient : data.idClient,
             nomComplet : data.nomComplet,
+            ImgClient : data.imgUser,
             raison : data.raison,
             justification : data.justification,
-            dateSignal : currentTime
+            dateSignal : formattedDate
         }) 
 
         await property.updateOne(property);
@@ -2205,8 +2207,110 @@ app.put("/aaqari/api/admin/update/data/compteUser" ,cors(),async (req,res)=>{
 /* #################################### end admin update data compte user #################################### */
 
 
+/* #################################### start admin gestion des rapports #################################### */
+app.get("/aaqari/api/Admin/rapports", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const vide = null
+  
+    try {
+        const AnnonceRpporter = await Property.find({ signaler: { $exists: true, $not: { $size: 0 } } });
+
+        res.send({AnnonceRpporter,etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+
+})
 
 
+/* #################################### end admin gestion des rapports #################################### */
+
+
+
+
+/* #################################### start suspendre annonce signalé admin #################################### */
+app.put("/aaqari/api/Admin/rapport/decision/suspendre", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    const idProperty = data.idProperty;
+  
+    try {
+        const AnnonceSuspendre = await Property.findByIdAndUpdate(idProperty);
+
+        AnnonceSuspendre.statutImmo = "suspendre" ;
+        await AnnonceSuspendre.updateOne(AnnonceSuspendre) ;
+
+        res.send({AnnonceSuspendre,etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+})
+/* #################################### end suspendre annonce signalé admin #################################### */
+
+/* #################################### start reactiver annonce signalé admin  (publier) #################################### */
+app.put("/aaqari/api/Admin/rapport/decision/reactiver", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    const idProperty = data.idProperty;
+  
+    try {
+        const AnnonceSuspendre = await Property.findByIdAndUpdate(idProperty);
+
+        AnnonceSuspendre.statutImmo = "publier" ;
+        await AnnonceSuspendre.updateOne(AnnonceSuspendre) ;
+
+        res.send({AnnonceSuspendre,etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+})
+/* #################################### end reactiver annonce signalé admin (publier) #################################### */
+
+
+/* #################################### start get user by id admin  #################################### */
+app.post("/aaqari/api/Admin/getUserById/rapport", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    const idUser = data.idUser;
+  
+    try {
+        const user = await Utilisateurs.findById(idUser);
+
+
+        res.send({user,etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+})
+
+/* #################################### end get user by id admin  #################################### */
+
+/* #################################### start annuler rapport signalé admin #################################### */
+app.put("/aaqari/api/Admin/rapport/decision/AnnulerRapport", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    const idProperty = data.idProperty;
+  
+    try {
+        const updatedProperty = await Property.findByIdAndUpdate(
+            idProperty,
+            { $set: { signaler: [], statutImmo: "publier" } },
+            { new: true }
+        );
+
+        await updatedProperty.updateOne(updatedProperty) ;
+
+        res.send({updatedProperty,etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+})
+/* #################################### start annuler rapport signalé admin #################################### */
 
 app.listen(2000,()=>{
     console.log("Iam listining in porte 2000");

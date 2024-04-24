@@ -1229,6 +1229,215 @@ app.post("/aaqari/api/proprietaire/createProperty", cors() ,async (req,res)=>{
 
 })
 /* ################### end request new property and save ################### */
+function test(value){
+    if(value ==="Oui"){
+        return true
+    }else{
+        return false
+    }
+}
+/* ################### start request update property and save ################### */
+app.put("/aaqari/api/proprietaire/update/property", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+   /* const currentTime = new Date();
+    const formattedDate = format(currentTime, 'dd/MM/yyyy HH:mm');*/
+    const opt =data.operation;
+    const type =data.typeProperty;
+    const idProperty = data.idProperty;
+    try {
+        const Annonce = await Property.findByIdAndUpdate(idProperty);
+
+        Annonce.nom =data.nomProperty
+        Annonce.description = await generateDescriptionImmo(type , data)
+
+        Annonce.region = data.region
+        Annonce.ville = data.ville
+        Annonce.zone = data.zone
+        Annonce.gps = data.gps
+
+        Annonce.operation =opt
+        if(opt ==="location"){
+            Annonce.IsLocation.valueLoc = true
+            Annonce.IsLocation.periode = data.periode
+            Annonce.IsLocation.prix = data.prixLoc
+        }else{
+            Annonce.IsLocation.valueLoc = false
+            Annonce.IsLocation.periode = ""
+            Annonce.IsLocation.prix = 0
+        }
+
+        if(opt ==="vendre"){
+            Annonce.IsVendre.valueVendre = true
+            Annonce.IsVendre.prix = data.prixVendre
+        }else{
+            Annonce.IsVendre.valueVendre = false
+            Annonce.IsVendre.prix = 0
+        }
+        const IsResid =IsResidence(type);
+        if(IsResid){
+            Annonce.IsResidence.ValueResid = true
+            Annonce.IsResidence.nbChambre = data.NbreChambre
+            Annonce.IsResidence.specification.bedRoom = data.bedRoom
+            Annonce.IsResidence.specification.piscine = test(data.piscine)
+            Annonce.IsResidence.specification.cuisine = data.cuisine
+            Annonce.IsResidence.specification.terrasse = data.terrasse
+            Annonce.IsResidence.specification.salleDeBains = data.bain
+            Annonce.IsResidence.specification.salans = data.salans
+            Annonce.IsResidence.specification.jardin =  test(data.jardin)
+            Annonce.IsResidence.specification.garage = test(data.garage)
+            Annonce.IsResidence.specification.immeuble = test(data.resImmeuble)
+            Annonce.IsResidence.specification.environnement.mer = test(data.mer)
+            Annonce.IsResidence.specification.environnement.parking = test(data.parking)
+        }else{
+            Annonce.IsResidence.ValueResid = false
+            Annonce.IsResidence.nbChambre = 0
+            Annonce.IsResidence.specification.bedRoom = 0
+            Annonce.IsResidence.specification.piscine = false
+            Annonce.IsResidence.specification.cuisine = 0
+            Annonce.IsResidence.specification.terrasse = 0
+            Annonce.IsResidence.specification.salleDeBains = 0
+            Annonce.IsResidence.specification.salans = 0
+            Annonce.IsResidence.specification.jardin = false
+            Annonce.IsResidence.specification.garage = false
+            Annonce.IsResidence.specification.immeuble = false
+            Annonce.IsResidence.specification.environnement.mer = false
+            Annonce.IsResidence.specification.environnement.parking = false
+        }
+
+        if(isIndustrielle(type)){
+            Annonce.IsIndustriel.ValueIndustrie = true
+            Annonce.IsIndustriel.content.Bureaux = test(data.BureauxContentIndustrie)
+            Annonce.IsIndustriel.content.sanitaires = test(data.sanitairesContentIndustrie)
+            Annonce.IsIndustriel.content.parking = test(data.parkingContentIndustrie)
+            Annonce.IsIndustriel.content.situeZoneIndustrie = test(data.situeZoneIndustrie)
+
+        }else{
+            Annonce.IsIndustriel.ValueIndustrie = false
+            Annonce.IsIndustriel.content.Bureaux = false
+            Annonce.IsIndustriel.content.sanitaires = false
+            Annonce.IsIndustriel.content.parking = false
+            Annonce.IsIndustriel.content.situeZoneIndustrie = false
+        }
+
+        if(IsZoneTouristique(type)){
+            Annonce.IsZoneTouristique.ValueTouristique = true
+            Annonce.IsZoneTouristique.content.plage = test(data.zoneTouristContentPlage)
+            Annonce.IsZoneTouristique.offre.hotel = test(data.zoneTouristOffreHotel)
+            Annonce.IsZoneTouristique.offre.restaurant = test(data.zoneTouristOffreRestaurant)
+            Annonce.IsZoneTouristique.offre.bars = test(data.zoneTouristOffreBars)
+            Annonce.IsZoneTouristique.offre.centreCommerciaux = test(data.zoneTouristOffreCentreCommerciaux)
+            Annonce.IsZoneTouristique.offre.activitySportives = test(data.zoneTouristOffreActivitySportives)
+        }else{
+            Annonce.IsZoneTouristique.ValueTouristique = false
+            Annonce.IsZoneTouristique.content.plage = false
+            Annonce.IsZoneTouristique.offre.hotel = false
+            Annonce.IsZoneTouristique.offre.restaurant = false
+            Annonce.IsZoneTouristique.offre.bars = false
+            Annonce.IsZoneTouristique.offre.centreCommerciaux = false
+            Annonce.IsZoneTouristique.offre.activitySportives = false
+        }
+
+        if(IsStudio(type)){
+            Annonce.IsStudio.ValueStudio = true
+            Annonce.IsStudio.content.maxNbrePersone = data.StudioNbrePersoneMax
+            Annonce.IsStudio.content.meublé = test(data.StudioMeublé)
+            Annonce.IsStudio.content.spacieux = test(data.StudioSpacieux)
+            Annonce.IsStudio.content.lumineux = test(data.StudioLumineux)
+
+            Annonce.IsStudio.content.specification.cuisine = test(data.StudioSpecificationCuisine)
+            Annonce.IsStudio.content.specification.salleDeBain = test(data.StudioSpecificationSalleDeBain)
+            Annonce.IsStudio.content.specification.terrace = test(data.StudioSpecificationTerrace)
+
+        }else{
+            Annonce.IsStudio.ValueStudio = false
+            Annonce.IsStudio.content.maxNbrePersone = 0
+            Annonce.IsStudio.content.meublé = false
+            Annonce.IsStudio.content.spacieux = false
+            Annonce.IsStudio.content.lumineux = false
+
+            Annonce.IsStudio.content.specification.cuisine = false
+            Annonce.IsStudio.content.specification.salleDeBain = false
+            Annonce.IsStudio.content.specification.terrace = false
+        }
+        
+        if(IsTerrain(type)){
+            Annonce.IsTerrain.ValueTerrain = true
+            Annonce.IsTerrain.content.espaceEnHectare = data.TerrainContentEspaceEnHectare
+            Annonce.IsTerrain.content.plat = test(data.TerrainContentPlat)
+            Annonce.IsTerrain.content.fertile = test(data.TerrainContentFertile)
+            Annonce.IsTerrain.content.irriguéParPuits = test(data.TerrainContentIrrigueParPuits)
+            Annonce.IsTerrain.content.routeGoudronnée = test(data.TerrainContentRouteGoudronnee)
+            Annonce.IsTerrain.content.terrainBoisé = test(data.TerrainContentTerrainBoise)
+            Annonce.IsTerrain.content.typeArbres = data.TerrainContentTypeArbre
+        }else{
+            Annonce.IsTerrain.ValueTerrain = false
+            Annonce.IsTerrain.content.espaceEnHectare = 0
+            Annonce.IsTerrain.content.plat = false
+            Annonce.IsTerrain.content.fertile = false
+            Annonce.IsTerrain.content.irriguéParPuits = false
+            Annonce.IsTerrain.content.routeGoudronnée = false
+            Annonce.IsTerrain.content.terrainBoisé = false
+            Annonce.IsTerrain.content.typeArbres = ""
+        }
+        
+        if(IsLocalCommercial(type)){
+            Annonce.isLocalCommercial.ValueLocalCommercial = true
+            Annonce.isLocalCommercial.content.ZoneCommAchalandee = test(data.LocalCommZoneCommAchalandee)
+            Annonce.isLocalCommercial.content.transportPublic = test(data.LocalCommTransportPublic)
+            Annonce.isLocalCommercial.content.parking = test(data.LocalCommParking)
+            Annonce.isLocalCommercial.content.lumineux = test(data.LocalCommLumineux)
+            Annonce.isLocalCommercial.content.spacieux = test(data.LocalCommSpacieux)
+        }else{
+            Annonce.isLocalCommercial.ValueLocalCommercial = false
+            Annonce.isLocalCommercial.content.ZoneCommAchalandee = false
+            Annonce.isLocalCommercial.content.transportPublic = false
+            Annonce.isLocalCommercial.content.parking = false
+            Annonce.isLocalCommercial.content.lumineux = false
+            Annonce.isLocalCommercial.content.spacieux = false
+        }
+        if(IsBureau(type)){
+            Annonce.IsBureau.ValueBureau = true
+            Annonce.IsBureau.content.ApprocheTransportPublic = test(data.isBureauApprocheTransportPublic)
+            Annonce.IsBureau.content.ApprocheAdministrations = test(data.isBureauApprocheAdministrations)
+            Annonce.IsBureau.content.lumineux = test(data.isBureauLumineux)
+            Annonce.IsBureau.content.spacieux = test(data.isBureauSpacieux)
+            Annonce.IsBureau.content.ImmeubleRecent = test(data.isBureauImmeubleRecent)
+            Annonce.IsBureau.content.specification.kitchenette = test(data.isBureauSpecificationkitchenette)
+            Annonce.IsBureau.content.specification.salleAttente = test(data.isBureauSpecificationSalleAttente)
+            Annonce.IsBureau.content.specification.sanitaire = test(data.isBureauSpecificationSanitaire)
+        }else{
+            Annonce.IsBureau.ValueBureau = false
+            Annonce.IsBureau.content.ApprocheTransportPublic = false
+            Annonce.IsBureau.content.ApprocheAdministrations = false
+            Annonce.IsBureau.content.lumineux = false
+            Annonce.IsBureau.content.spacieux = false
+            Annonce.IsBureau.content.ImmeubleRecent = false
+            Annonce.IsBureau.content.specification.kitchenette = false
+            Annonce.IsBureau.content.specification.salleAttente = false
+            Annonce.IsBureau.content.specification.sanitaire = false
+        }
+
+        Annonce.features.espace = data.espace
+
+        if(opt ==="location"){
+            Annonce.prixGlobal = data.prixLoc
+        }else{
+            Annonce.prixGlobal = data.prixVendre
+        }
+
+        await Annonce.updateOne(Annonce) ;
+        res.send({etat , Annonce})
+
+    } catch (error) {
+        const etat = statusRequest("500" , "echec");
+        res.send({etat})
+        
+    }
+
+
+})
+/* ################### end request update property and save ################### */
 
 /* ################### start request get all proprietaire property ################### */
 app.post("/aaqari/api/proprietaire/getAllByIdProp",async (req,res)=>{

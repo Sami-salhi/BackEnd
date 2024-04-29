@@ -1474,6 +1474,42 @@ app.get("/aaqari/api/Admin/getAllNewProperty", cors() ,async (req,res)=>{
 })
 /* ################### end request get all proprietaire property ################### */
 
+/* ################### start request get all annonces for location ################### */
+app.get("/aaqari/api/user/getAllProperty/forLocation", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const public = "publier"
+    const location = "location"
+  
+    try {
+        const AnnoncesLocation = await Property.find({ statutImmo: public , operation : location });
+
+        res.send({AnnoncesLocation,etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+
+})
+/* ################### end request get all annonces for location ################### */
+
+/* ################### start request get all annonces for vendre ################### */
+app.get("/aaqari/api/user/getAllProperty/forVendre", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const public = "publier"
+    const vendre = "vendre"
+  
+    try {
+        const AnnoncesVendre = await Property.find({ statutImmo: public , operation : vendre });
+
+        res.send({AnnoncesVendre,etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+
+})
+/* ################### end request get all annonces for vendre ################### */
+
 
 /* ################### start request get all proprietaire property ################### */
 app.get("/aaqari/api/Client/getAllPropertyPublie", cors() ,async (req,res)=>{

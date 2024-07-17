@@ -1,6 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const {format} = require('date-fns');
+
+
+const {OpenAI} = require("openai");
 const app = express();
 
 const bodyParser = require('body-parser');
@@ -12,7 +15,21 @@ const cookieParsar = require("cookie-parser");
 const cors = require("cors");
 
 
-mongoose.connect("mongodb+srv://sami:sami21032000@myapp.mfxyigl.mongodb.net/?retryWrites=true&w=majority&appName=MyApp")
+
+/*const openai = new OpenAI({
+    apiKey: "sk-proj-jYqqvZ6fyoDsTCstBWRTT3BlbkFJG5o2HfzdsVDrxHRJAG4K" , 
+  });*/
+
+
+/*const OpenApi = "sk-proj-jYqqvZ6fyoDsTCstBWRTT3BlbkFJG5o2HfzdsVDrxHRJAG4K" org-XUWQ9vB2VscsAqdYIEO5GwLj;
+const openai = new OpenAI({
+    apiKey: "sk-proj-jYqqvZ6fyoDsTCstBWRTT3BlbkFJG5o2HfzdsVDrxHRJAG4K", 
+});*/
+/* mongodb+srv://<username>:<password>@myapp.mfxyigl.mongodb.net/
+
+mongodb+srv://sami:sami21032000@myapp.mfxyigl.mongodb.net/?retryWrites=true&w=majority&appName=MyApp
+ */
+mongoose.connect("mongodb+srv://lyrx:lyrx123@myapp.mfxyigl.mongodb.net/")
 .then(()=>{
     console.log("dataBase Connect");
 })
@@ -22,13 +39,21 @@ mongoose.connect("mongodb+srv://sami:sami21032000@myapp.mfxyigl.mongodb.net/?ret
 
 const Utilisateurs =require("./models/Utilisateur");
 const { sendConfirmationEmail } = require("./routes/nodemailer");
+const { reinitialisationPass } = require("./routes/reinitialisationPass");
 const Property = require("./models/Property");
 const Demandes = require("./models/Demandes");
+const Avis = require("./models/Avis");
+const Favoris = require("./models/Favoris");
+const Contact = require("./models/Contact");
+const Conversation = require("./models/Conversations");
+const Messages = require("./models/Messages");
+const ReportProfil = require("./models/ReportProfil");
+const AvisAnnonce = require("./models/AvisAnnonce");
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParsar());
 app.use(cors({
-    origin :"http://localhost:3000" || "http://192.168.1.66:3000",
+    origin : "https://pfe-aaqari-app.vercel.app/"  || "http://localhost:3000" ,
     methods:["GET", "POST", "PUT", "DELETE"],
     preflightContinue: false,
     optionsSuccessStatus: 200,
@@ -62,8 +87,91 @@ app.get("/code",  (req,res)=>{
 })
 
 
+async function ChatBot(message) {
+   /* const chatCompletion = await openai.chat.completions.create({
+        messages: [{ role: 'user', content: message }],
+        model: 'gpt-3.5-turbo',
+        timeout: 5 * 1000,
+        maxRetries: 5,
+      });
+
+      console.log(chatCompletion)*/
+      return message
+    
+}
+
+app.post("/aaqari/api/chatBot/assistant", cors() ,async (req,res)=>{
+
+    const response = await ChatBot("Say this is a test");
+    res.send(response);
+
+})
+
+/* ###################################### start contact ###################################### */
+app.post("/aaqari/api/user/send/contact", cors() ,async (req,res)=>{
+
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    const currentTime = new Date();
+    const formattedDate = format(currentTime, 'dd/MM/yyyy HH:mm');
+
+    try {
+        const newContact = new Contact()
+        newContact.expediteur = data.expediteur
+        newContact.emailID = data.emailID
+        newContact.sujet = data.sujet
+        newContact.redaction = data.redaction
+        newContact.date = formattedDate
+    
+        await newContact.save()
+
+        res.send({etat , newContact})
+        
+    } catch (error) {
+        const etat = statusRequest("500" , "operation d'envoie contact est échoué ");
+        res.send({etat})
+    }
+
+   
+
+})
+app.get("/aaqari/api/Admin/getAll/contact", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    try {
+        const listContact = await Contact.find();
+        if(listContact.length === 0){
+            const etat = statusRequest("400" , "Aucun contact");
+            return res.send({etat , listContact});
+            
+        }
+        res.send({etat , listContact});
+
+        
+    } catch (error) {
+        res.status(500).send(' recuperation des avis est échoué ');
+    }
+
+ })
 
 
+ app.post("/aaqari/api/Admin/delete/Contact",cors(), async (req,res)=>{ 
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    try {
+        const deletedContact = await Contact.findByIdAndDelete(data.idContact);
+       if (!deletedContact) {
+            const etat = statusRequest("404", "Contact introuvable");
+            return res.send({ etat });
+        }
+
+        res.send({ etat })
+        
+    } catch (error) {
+        res.status(500).send("suppresion d'un contact user est échoué ");
+    }
+
+})
+/* ###################################### end contact ###################################### */
 
 
 app.post("/user",async (req,res)=>{
@@ -1526,6 +1634,25 @@ app.get("/aaqari/api/Client/getAllPropertyPublie", cors() ,async (req,res)=>{
    
 
 })
+
+app.post("/aaqari/api/Client/getImmo/similaire", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+  
+    try {
+        const annonceSimilaire = await Property.find({ type: data.typeImmoSimilaire });
+        if(annonceSimilaire.length === 0){
+            const etat = statusRequest("400" , "Aucun resultat");
+            return  res.send({annonceSimilaire , etat});
+        }
+
+        res.send({annonceSimilaire,etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+
+})
 /* ################### end request get all proprietaire property ################### */
 
 
@@ -1831,8 +1958,112 @@ app.get("/allUsers",cors(), async (req,res)=>{
     res.send(user)
 })
 
+/* #################################### start reset compte #################################### */
+app.post("/aaqari/api/auth/reset/password/existanceCompte",cors() , async (req,res)=>{ 
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    let code =  generateCodeConfirmation();
+    const mailto = data.gmail;
+    const currentTime = new Date();
+    const formattedDate = format(currentTime, 'dd/MM/yyyy HH:mm');
+    try {
+        const user = await Utilisateurs.findOne( {userName : data.gmail});
+        if(!user) {
+            const etat = statusRequest("404" , "utilisateur non existe");
+            return res.send({etat})
+        }
+        
+    
+    await reinitialisationPass(mailto,code);
 
+    const dataMail ={
+        dateCurrent : formattedDate,
+        gmailConcernant : data.gmail,
+        codeConfirmation : code,
+        step : "verification",
+    }
+    res.send({etat ,dataMail })
+    } catch (error) {
+        res.send("operation de verifier l'existance de compte est echoué")
+    }
+})
 
+/* #################################### end reset compte #################################### */
+
+app.post("/aaqari/api/Auth",cors() , async (req,res)=>{
+    const currentDate = new Date();
+    const formattedDate = format(currentDate, 'dd/MM/yyyy HH:mm');
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+
+    try {
+        const user = await Utilisateurs.findOne( {userName : data.gmail});
+        if(!user) {
+            const newUser = new Utilisateurs()
+            
+            newUser.nom=data.nom
+            newUser.prenom=data.prenom
+            newUser.DateNaissance="0000-00-00"
+            
+            newUser.userName=data.gmail
+            newUser.ComeQui="Client"
+            newUser.Cin=""
+           
+            const salt = bcrypt.genSaltSync(10);
+            const PassHash = bcrypt.hashSync(data.Fullname,salt);
+          
+            newUser.NumTel="00000000"
+            newUser.auth.email=data.gmail
+            newUser.auth.password=PassHash
+            newUser.auth.dateModification =formattedDate
+
+            newUser.ImgProfil=data.pictureImg
+            newUser.EtatCompte="Active"
+        
+            newUser.isActive.status=true
+            newUser.isActive.codeActivation =generateCodeActivation()
+            newUser.isActive.codeConfirmation=""
+        
+            await newUser.save()
+           const user = newUser
+
+            res.send({user, etat ,  operation : "inscription"})
+        }
+
+        if(user.EtatCompte ==="ban") {
+            const etat = statusRequest("405" , "Compte est banned");
+            return res.send({etat}).json();
+        }
+
+        res.send({ user , etat , operation : "connexion"})
+        
+    } catch (error) {
+        res.send("authentification est echoué")
+    }
+
+})
+app.post("/aaqari/api/Auth/resetPass/update",cors() , async (req,res)=>{
+    const currentDate = new Date();
+    const formattedDate = format(currentDate, 'dd/MM/yyyy HH:mm');
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    try {
+        const user = await Utilisateurs.findOne( {userName : data.gmail});
+
+       
+
+        const salt = bcrypt.genSaltSync(10);
+        const PassHash = bcrypt.hashSync(data.NewPass,salt);
+    
+        user.auth.password = PassHash;
+        user.auth.dateModification = formattedDate;
+
+    await user.updateOne(user) ;
+    res.send({ etat , user});
+    } catch (error) {
+        res.send("reset pass est echoué")
+    }
+})
 
 /* #################################### start connexion au compte utilisateur #################################### */
 
@@ -2040,11 +2271,13 @@ app.put("/aaqari/api/utilisateur/update/infoPersonnel",cors(), async (req,res)=>
 
     await user.updateOne(user) ;
     res.send({ etat , user}).json();
+    
 
     }
     catch(err){
         res.status(500).send(' update utilisateur est echoué');
     } 
+    
  })
 
 /* update password utilisateur */
@@ -2080,6 +2313,159 @@ app.put("/aaqari/api/utilisateur/update/security",cors(), async (req,res)=>{
         }
 
 })
+
+/* ############################## start nouveau avis ############################## */
+app.post("/aaqari/api/utilisateur/add/avis",cors(), async (req,res)=>{ 
+    const currentDate = new Date();
+    const formattedDate = format(currentDate, 'dd/MM/yyyy HH:mm');
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    try {
+        const avisExist = await Avis.findOne({ idUser: data.idUser });
+        if(avisExist){
+            avisExist.sujet = data.Sujet; 
+            avisExist.NomComplet = data.NomComplet; 
+            avisExist.ImgProfil = data.ImgProfil; 
+            avisExist.CommeQui = data.CommeQui; 
+            avisExist.dateCreation = formattedDate; 
+
+            await avisExist.save();
+            const etat = statusRequest("202" , "mise à jour d'avis est effectué avec succes");
+            return res.send({etat , avisExist}).json();
+        }
+
+        const newAvis = new Avis();
+        newAvis.sujet = data.Sujet; 
+        newAvis.idUser = data.idUser; 
+        newAvis.NomComplet = data.NomComplet; 
+        newAvis.ImgProfil = data.ImgProfil; 
+        newAvis.CommeQui = data.CommeQui; 
+        newAvis.dateCreation = formattedDate; 
+
+        await newAvis.save()
+        res.send({newAvis , etat})
+        
+    } catch (error) {
+        res.status(500).send(' creation de nouveau avis est échoué ');
+    }
+    
+
+})
+app.get("/aaqari/api/utilisateur/avis/getAll",cors(), async (req,res)=>{ 
+    const etat = statusRequest("200" , "success");
+    try {
+        const avis = await Avis.find();
+        if(avis.length === 0){
+            const etat = statusRequest("400" , "Aucun Avis");
+            return res.send({etat , avis});
+        
+            
+        }
+        res.send({etat , avis});
+
+        
+    } catch (error) {
+        res.status(500).send(' recuperation des avis est échoué ');
+    }
+})
+
+/* ############################## end nouveau avis ############################## */
+
+/* ############################## start favoris ############################## */
+app.post("/aaqari/api/utilisateur/favoris",cors(), async (req,res)=>{ 
+    const currentDate = new Date();
+    const FavorisDate = format(currentDate, 'dd/MM/yyyy HH:mm');
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+   
+    try {
+
+
+        const FavorisExist = await Favoris.find({ IdUser: data.IdUserUnique , idPropertyUnique: data.idProperty});
+       if(FavorisExist.length > 0){
+            const etat = statusRequest("202" , "Favoris déjà existe");
+            return res.status(202).json({ etat });
+        }
+
+        
+        const newFavoris = new Favoris();
+        newFavoris.IdUser = data.IdUserUnique; 
+        newFavoris.nomCompletUser = data.nomCompletUser; 
+        newFavoris.ImgProfilUser = data.ImgProfilUser; 
+        newFavoris.idPropertyUnique = data.idProperty; 
+
+        newFavoris.DetailsProperty.idProperty = data.idProperty; 
+        newFavoris.DetailsProperty.imgPropertyPrincipal = data.imgPropertyPrincipal; 
+        newFavoris.DetailsProperty.TypeProperty = data.TypeProperty; 
+        newFavoris.DetailsProperty.descriptionProperty = data.descriptionProperty; 
+        newFavoris.DetailsProperty.NomProperty = data.NomProperty; 
+        newFavoris.DetailsProperty.Evaluation = data.Evaluation; 
+        newFavoris.DetailsProperty.operation = data.operation; 
+        newFavoris.DetailsProperty.prixGlobal = data.prixGlobal; 
+        newFavoris.DetailsProperty.statutProperty = data.statutProperty; 
+        newFavoris.DetailsProperty.Adresse = data.Adresse; 
+
+        newFavoris.detailsProprietaire.idProprietaire = data.idProprietaire; 
+        newFavoris.detailsProprietaire.nomCompletProprietaire = data.nomCompletProprietaire; 
+        newFavoris.detailsProprietaire.contact.telProprietaire = data.telProprietaire; 
+        newFavoris.detailsProprietaire.contact.emailProprietaire = data.emailProprietaire; 
+
+        newFavoris.DateFavoris = FavorisDate; 
+        
+       
+        await newFavoris.save()
+        res.send({newFavoris , etat})
+
+       
+      
+    
+
+        
+    } catch (error) {
+        res.status(500).send(' creation de nouveau favoris est échoué ');
+    }
+})
+
+app.post("/aaqari/api/utilisateur/favoris/getByIDUser",cors(), async (req,res)=>{ 
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    try {
+        const ListeFavoris = await Favoris.find({ IdUser: data.IdUserUnique });
+        if(ListeFavoris.length === 0){
+             const etat = statusRequest("402" , "Aucun favoris");
+             return res.send({etat , ListeFavoris});
+         }
+
+         res.send({ etat , ListeFavoris })
+ 
+        
+    } catch (error) {
+        res.status(500).send(' recuperation de annonce favoris est échoué ');
+    }
+
+})
+
+app.post("/aaqari/api/utilisateur/favoris/delete",cors(), async (req,res)=>{ 
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    try {
+        const deletedFavoris = await Favoris.findByIdAndDelete(data.idFavoris);
+       if (!deletedFavoris) {
+            const etat = statusRequest("404", "Favoris introuvable");
+            return res.send({ etat });
+        }
+
+        res.send({ etat })
+        
+    } catch (error) {
+        res.status(500).send(' suppresion de annonce favoris est échoué ');
+    }
+
+})
+
+/* ############################## end favoris ############################## */
+
+
 /* update photo utilisateur */
 app.put("/aaqari/api/utilisateur/update/photo",cors(), async (req,res)=>{ 
     const data = req.body;
@@ -2347,6 +2733,23 @@ app.post("/aaqari/api/utilisateur/property/demande",cors() ,async (req,res)=>{
     
 })
 
+app.post("/aaqari/api/utilisateur/getAll/MyDemande",cors() ,async (req,res)=>{
+    const data = req.body;
+    const etat = statusRequest("200" , "success");
+
+    try {
+        const listeDemande = await Demandes.find({idClient : data.IdExpediteur});
+       if (listeDemande.length === 0) {
+            const etat = statusRequest("400", "Aucun demande");
+            return res.send({ etat , listeDemande });
+        }
+
+        res.send({ etat , listeDemande })
+        
+    } catch (error) {
+        res.status(500).send("suppresion d'un contact user est échoué ");
+    }
+})
 
 /* #################################### end new demande location / achat #################################### */
 
@@ -2471,7 +2874,28 @@ app.get("/aaqari/api/Admin/rapports", cors() ,async (req,res)=>{
 
 /* #################################### end admin gestion des rapports #################################### */
 
+/* #################################### star proprietaire decision contrat & offre demande #################################### */
+app.post("/aaqari/api/proprietaire/offreDemande", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+  
+    try {
+        const offres = await Property.find({ offreDemande: { $exists: true, $not: { $size: 0 } } , idProprietaire : data.idProprietaire});
 
+        if(offres.length === 0){
+            const etat = statusRequest("400" , "Aucun offre proposé");
+            return res.send({offres , etat});
+        }
+
+        res.send({offres , etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+
+})
+
+/* #################################### end proprietaire decision contrat & offre demande #################################### */
 
 
 /* #################################### start suspendre annonce signalé admin #################################### */
@@ -2493,6 +2917,97 @@ app.put("/aaqari/api/Admin/rapport/decision/suspendre", cors() ,async (req,res)=
    
 })
 /* #################################### end suspendre annonce signalé admin #################################### */
+
+
+/* #################################### start get demande by id #################################### */
+app.post("/aaqari/api/proprietaire/getDemandeById", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    const idDmd = data.idDemande
+   
+  
+    try {
+        const demande = await Demandes.findById(idDmd);
+
+        res.send({demande,etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+})
+
+function IndiceStatutOffreDemande(OffreDmd , idClient) {
+    var indice = 0;
+    if(OffreDmd.length > 0){
+        for (let i = 0; i < OffreDmd.length; i++) {
+            if(OffreDmd[i].idClient === idClient){
+                indice = i;
+                break;
+            }else{
+                indice = 0;
+            }
+    }}
+    return indice;
+}
+app.post("/aaqari/api/proprietaire/offreDemande/Accepter", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    const idDmd = data.idDemande
+    const currentTime = new Date();
+    const formattedDate = format(currentTime, 'dd/MM/yyyy HH:mm');
+
+    const accepter = "Accepter";
+   
+  
+    try {
+        const demande = await Demandes.findByIdAndUpdate(idDmd);
+
+        const property = await Property.findById(demande.idProperty);
+
+        const indice = IndiceStatutOffreDemande(property.offreDemande , demande.idClient);
+
+
+        demande.decision.valueDec = accepter;
+        demande.decision.dateDec = formattedDate;
+        property.offreDemande[indice].statut = accepter;
+
+        await demande.updateOne(demande);
+        await property.updateOne(property);
+        res.send({demande,etat , indi : indice , property});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+})
+app.post("/aaqari/api/proprietaire/offreDemande/Rejeter", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    const idDmd = data.idDemande
+    const currentTime = new Date();
+    const formattedDate = format(currentTime, 'dd/MM/yyyy HH:mm');
+
+    const rejeter = "Rejeter";
+   
+  
+    try {
+        const demande = await Demandes.findByIdAndUpdate(idDmd);
+        const property = await Property.findById(demande.idProperty);
+
+        const indice = IndiceStatutOffreDemande(property.offreDemande , demande.idClient);
+
+        demande.decision.valueDec = rejeter;
+        demande.decision.dateDec = formattedDate;
+        property.offreDemande[indice].statut = rejeter;
+
+        await demande.updateOne(demande);
+        await property.updateOne(property);
+        res.send({demande,etat , indi : indice , property});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+})
+/* #################################### end get demande by id #################################### */
 
 /* #################################### start reactiver annonce signalé admin  (publier) #################################### */
 app.put("/aaqari/api/Admin/rapport/decision/reactiver", cors() ,async (req,res)=>{
@@ -2557,6 +3072,346 @@ app.put("/aaqari/api/Admin/rapport/decision/AnnulerRapport", cors() ,async (req,
 })
 /* #################################### start annuler rapport signalé admin #################################### */
 
+
+/* #################################### start chat box #################################### */
+app.post("/aaqari/api/Conversation", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    const currentTime = new Date();
+    const formattedDate = format(currentTime, 'dd/MM/yyyy HH:mm');
+    const IdSender = data.SenderId ;
+    const IdReceiver = data.ReceiverId ;
+  
+    try {
+        const ConversationExist = await Conversation.findOne({ SenderId : IdSender , ReceiverId : IdReceiver});
+        if(ConversationExist){
+            const etat = statusRequest("402" , "Conversation exist");
+            return res.send({Conversation , etat});
+        }
+
+        const NewConversation = new Conversation();
+        NewConversation.SenderId = data.SenderId
+        NewConversation.ReceiverId = data.ReceiverId
+
+        NewConversation.SenderData.NomComplet = data.SenderDataNomComplet
+        NewConversation.SenderData.ImgProfil = data.SenderDataImgProfil
+
+        NewConversation.ReceiverData.NomComplet = data.ReceiverDataNomComplet
+        NewConversation.ReceiverData.ImgProfil = data.ReceiverDataImgProfil
+        NewConversation.DateCreation = formattedDate
+
+        await NewConversation.save();
+
+        res.send({NewConversation , etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+   
+})
+
+app.post("/aaqari/api/getAll/MyConversation", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+
+
+    try {
+        const ListeConversations = await Conversation.find({ $or: [{ SenderId: data.userId }, { ReceiverId: data.userId }] });
+
+       /* if (ListeConversations.length === 0) {
+            const etat = statusRequest("400" , "Aucun conversation");
+            return  res.send({ListeConversations , etat});
+        }*/
+        
+        const conversationUserData =  Promise.all(ListeConversations.map(async (conversationItem)=>{
+            let receiverId ;
+            if(conversationItem.ReceiverId  !== data.userId){
+                receiverId = conversationItem.ReceiverId;
+            }
+            if(conversationItem.SenderId  !== data.userId){
+                 receiverId = conversationItem.SenderId;
+            }
+            
+            /*const receiverId = conversationItem.find((member)=> member !== data.userId);*/
+            const usersAmis = await Utilisateurs.findById(receiverId);
+            
+            return {data : usersAmis , ConversationId : conversationItem._id } ;
+        }))
+
+
+        res.send({ ConversationsData : await conversationUserData , etat });
+    } catch (error) {
+        res.status(500).json({ message: "recuperation de votre conversation est échoué" });
+    }
+
+})
+
+
+app.post("/aaqari/api/getUserById", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+
+
+    try {
+        const user = await Utilisateurs.findById(data.idUser)
+
+       
+        res.send({ user , etat });
+    } catch (error) {
+        res.status(500).json({ message: "recuperation de  data user" });
+    }
+
+})
+
+app.post("/aaqari/api/Conversation/newMessage", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    const currentTime = new Date();
+    const formattedDate = format(currentTime, 'HH:mm');
+    
+    
+  
+    try {
+        const ConversationExist = await Conversation.findById(data.IdConversation);
+        if(ConversationExist.length === 0){
+            const etat = statusRequest("404" , "Conversation non exist");
+            return res.send({ConversationExist , etat});
+        }
+
+        const NewMessage = new Messages()
+        NewMessage.ConversationId = data.IdConversation 
+        NewMessage.SenderId = data.SenderId
+        NewMessage.Message = data.Message
+        NewMessage.DateSend = formattedDate 
+
+        await NewMessage.save();
+
+        res.send({NewMessage , etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+})
+
+app.post("/aaqari/api/getData/conversationById", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+
+    try {
+        const conversationMessage = await Messages.find({ ConversationId : data.IdConversation});
+        if(conversationMessage.length === 0){
+            const etat = statusRequest("404" , "Aucun Message");
+            return res.send({conversationMessage , etat});
+        }
+
+
+        res.send({conversationMessage , etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+})
+
+app.post("/aaqari/api/chatbox/delete/msg",cors(), async (req,res)=>{ 
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    try {
+        const deletedMsg = await Messages.findByIdAndDelete(data.idMsg);
+       if (!deletedMsg) {
+            const etat = statusRequest("404", "msg introuvable");
+            return res.send({ etat });
+        }
+
+        res.send({ etat })
+        
+    } catch (error) {
+        res.status(500).send("suppresion d'un msg user est échoué ");
+    }
+
+})
+/* #################################### end chat box #################################### */
+
+/* #################################### start statistique #################################### */
+app.post("/aaqari/api/get/Statistique", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+
+    const nbreTotaleUsers = await Utilisateurs.find();
+    const nbreNewAnnonce = await Property.find({statutImmo : "en attente"});
+    const nbreTotalAnnonces = await Property.find({statutImmo : "publier"});
+    const nbreAnnoncesParPorprietaire = await Property.find({idProprietaire : data.idUser});
+    const nbreDemandesParPorprietaire = await Demandes.find({idConcernéProprietaire : data.idUser});
+    const immoEnsousExploitation = await Property.find({idProprietaire : data.idUser , statutImmo : "occuper"});
+    const AnnoncesProprietaireEnAttente = await Property.find({idProprietaire : data.idUser , statutImmo : "en attente"});
+
+    const AnnoncesProprietaireAlouer = await Property.find({idProprietaire : data.idUser , operation : "location"});
+    const AnnoncesProprietaireAVendre = await Property.find({idProprietaire : data.idUser , operation : "vendre"});
+    res.send({NBTotalUsers : nbreTotaleUsers.length , NBNewAnnonces : nbreNewAnnonce.length , NBAnnoncesPorprietaire : nbreAnnoncesParPorprietaire.length ,
+        NBDemandesParPorprietaire : nbreDemandesParPorprietaire.length , immoEnSousExploitation : immoEnsousExploitation.length ,NBTotalAnnonces :nbreTotalAnnonces.length ,
+        NBAnnoncesProprietaireEnAttente :AnnoncesProprietaireEnAttente.length , annoncesAlocation : AnnoncesProprietaireAlouer.length, annoncesAVendre : AnnoncesProprietaireAVendre.length , etat
+    })
+})
+
+/* #################################### end statistique #################################### */
+
+
+app.post("/aaqari/api/user/gallery/imgProperty/explore", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+  
+    try {
+        const gallery = await Property.find({ type: data.typeImmo});
+
+        if(gallery.length === 0){
+            const etat = statusRequest("400" , "Aucun Image");
+            return res.send({gallery , etat});
+        }
+
+        res.send({gallery , etat});
+    } catch (err) {
+        res.status(500).json(" oops recuperation des images immo est échoué");
+    }
+   
+
+})
+
+
+app.post("/aaqari/api/user/consulterContrat/getContratByID", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+  
+    try {
+        const ContactData = await Demandes.findById(data.idDemande);
+
+        res.send({ContactData , etat});
+    } catch (err) {
+        res.status(500).json(" oops recuperation des images immo est échoué");
+    }
+   
+
+})
+
+
+/* #################################### start report profil #################################### */
+app.post("/aaqari/api/reportProfilProprietaire", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    const currentTime = new Date();
+    const formattedDate = format(currentTime, 'dd/MM/yyyy HH:mm');
+    
+  
+    try {
+       
+        const newReportProfil = new ReportProfil();
+        newReportProfil.IdReporter = data.IdReporter
+        newReportProfil.ReporterData.NomComplet = data.NomCompletReporter
+        newReportProfil.ReporterData.ImgProfil = data.ImgProfilReporter
+
+        newReportProfil.IdReported = data.IdReported
+        newReportProfil.ReportedData.NomComplet = data.NomCompletReported
+        newReportProfil.ReportedData.ImgProfil = data.ImgProfilReported
+        
+        newReportProfil.DateCreation = formattedDate
+
+        await newReportProfil.save();
+
+        res.send({newReportProfil , etat});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+   
+   
+})
+/* #################################### start report profil #################################### */
+/* #################################### start operation delete #################################### */
+app.post("/aaqari/api/admin/deleteUser", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+  
+    try {
+        const userDelte = await Utilisateurs.findByIdAndDelete(data.idUserDelete);
+
+        res.send({etat});
+    } catch (err) {
+        res.status(500).json(" oops operation de suppression compte user est échoué");
+    }
+   
+
+})
+app.post("/aaqari/api/prop/deleteAnnonce", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+  
+    try {
+        const AnnonceDelte = await Property.findByIdAndDelete(data.idAnnonceDelete);
+
+        res.send({etat});
+    } catch (err) {
+        res.status(500).json(" oops operation de suppression annonce est échoué");
+    }
+   
+
+})
+/* #################################### end operation delete #################################### */
+
+app.post("/aaqari/api/utilisateur/add/avisAnnonce",cors(), async (req,res)=>{ 
+    const currentDate = new Date();
+    const formattedDate = format(currentDate, 'dd/MM/yyyy HH:mm');
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+    try {
+        const avisAnnonceExist = await AvisAnnonce.findOne({ idUser: data.idUser });
+       if(avisAnnonceExist){
+            avisAnnonceExist.idProperty= data.idProperty;
+            avisAnnonceExist.avis = data.avis; 
+            avisAnnonceExist.NomComplet = data.NomComplet; 
+            avisAnnonceExist.ImgProfil = data.ImgProfil; 
+            avisAnnonceExist.CommeQui = data.CommeQui; 
+            avisAnnonceExist.dateCreation = formattedDate; 
+
+            await avisAnnonceExist.save();
+            const etat = statusRequest("202" , "mise à jour d'avis annonce est effectué avec succes");
+            return res.send({etat , avisAnnonceExist}).json();
+        }
+
+        const newAvisAnnonce = new AvisAnnonce();
+        newAvisAnnonce.idProperty= data.idProperty;
+        newAvisAnnonce.avis = data.avis; 
+        newAvisAnnonce.idUser = data.idUser; 
+        newAvisAnnonce.NomComplet = data.NomComplet; 
+        newAvisAnnonce.ImgProfil = data.ImgProfil; 
+        newAvisAnnonce.CommeQui = data.CommeQui; 
+        newAvisAnnonce.dateCreation = formattedDate; 
+
+        await newAvisAnnonce.save()
+        res.send({newAvisAnnonce , etat})
+        
+    } catch (error) {
+        res.status(500).send(' creation de nouveau avis est échoué ');
+    }
+    
+
+})
+
+app.post("/aaqari/api/utilisateur/add/GetavisAnnonceByProperty", cors() ,async (req,res)=>{
+    const etat = statusRequest("200" , "success");
+    const data = req.body;
+  
+    try {
+        const Avis = await AvisAnnonce.find({ idProperty: data.idProperty});
+
+        if(Avis.length === 0){
+            const etat = statusRequest("400" , "Aucun Avis");
+            return res.send({Avis , etat});
+        }
+
+        res.send({Avis , etat});
+    } catch (err) {
+        res.status(500).json(" oops recuperation des avis de ce annonce immo est échoué");
+    }
+   
+
+})
 app.listen(2000,()=>{
     console.log("Iam listining in porte 2000");
 });
